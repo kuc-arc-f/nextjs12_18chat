@@ -6,7 +6,7 @@
 
  date    : 2022/09/18 
 
- update  :
+ update  : 2022/09/24
 
 ***
 ### Summary
@@ -41,6 +41,9 @@ yarn dev
 
 ***
 ### Blog:
+* Next.js で、chat(チャット)
+
+https://zenn.dev/knaka0209/articles/c5b90d4d9b6df2
 
 ***
 
