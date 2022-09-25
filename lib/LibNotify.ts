@@ -51,12 +51,13 @@ console.log(permission);
           if (permission === 'granted') {// 許可
             var options ={
               body: body,
-              //icon: 'https://knaka0209.net/pwa/images/icon2.png',					                    
+              //icon: 'https://hoge/pwa/images/icon2.png',					                    
               tag: ''
             };
             var n = new Notification(title,options);
             console.log(n);
-            setTimeout(n.close.bind(n), 5000);
+//            setTimeout(n.close.bind(n), 5000);
+            setTimeout(n.close.bind(n), 10 * 1000);
           }
           else if (permission == 'denied') {// 拒否
           }

@@ -9,6 +9,8 @@ import LibChatPost from '@/lib/LibChatPost'
 import LibStorage from '@/lib/LibStorage';
 import LibNotify from '@/lib/LibNotify';
 import LibCookie from '@/lib/LibCookie';
+import LibCommon from '@/lib/LibCommon';
+import LibChat from '@/lib/LibChat';
 import IndexRow from './IndexRow';
 //
 LibStorage.set_exStorage("auto_update", 1)
@@ -21,6 +23,7 @@ const ChatShow: React.FC = function () {
   const [chatId, setChatId] = useState(0);
   const [userId, setUserId] = useState(0);
   const [lastCreateTime, setLastCreateTime] = useState("");
+  const [chatName, setChatName] = useState("");
 //console.log("chatId=", chatId);  
   const interval = 3000;
   /**
@@ -36,14 +39,18 @@ const ChatShow: React.FC = function () {
       setChatId(Number(queryParamas.id));
       const key = process.env.COOKIE_KEY_USER_ID;
       const uid = LibCookie.getCookie(key);
-console.log(uid);
+//console.log(uid);
       if(uid === null){
         location.href = '/auth/login';
       }   
       setUserId(Number(uid));   
       (async() => {
-      // @ts-ignore
+        const chat = await LibChat.get(Number(queryParamas.id));
+        setChatName(chat.name);
+//console.log(chatName);
+        // @ts-ignore
         const items = await get_items(Number(queryParamas.id));
+console.log(items);
         setItems(items);
       })()
     }
@@ -74,7 +81,10 @@ console.log(uid);
         const row = json.data[0];
         setLastCreateTime(row.createdAt);
       }
-      return json.data;
+      let items = json.data;
+      items = LibCommon.getDatetimeArray(items);
+//console.log(items);
+      return items;
     } catch (e) {
       console.error(e);
       throw new Error('Error , get_items');
@@ -92,7 +102,6 @@ console.log(uid);
         setItems(items);
         if(items.length > 0){
           const item: any = items[0];
-//console.log("lastCreateTime", lastCreateTime);
 //console.log(item.body, item.UserName, item.createdAt);
           if(lastCreateTime !== item.createdAt) {
             sendNotify(item.UserName, item.body);
@@ -157,8 +166,7 @@ console.log(uid);
   const parentFunc = async function (id: number) 
   {
     try {
-      console.log("parentFunc", id);
-      console.log("chatId", chatId);
+//console.log("parentFunc", id);
       const items = await get_items(chatId);
       setItems(items);
     } catch (e) {
@@ -170,7 +178,7 @@ console.log(uid);
   return (
     <Layout>
       <div className="container bg-light">
-      <h3>Chat Sample</h3>
+      <h3>{chatName}</h3>
       ID: {chatId}
       {/*
       <button onClick={() => {sendNotify();}}>[testNoti]</button>
@@ -192,7 +200,7 @@ console.log(uid);
         return (
           <div key={item.id}>
             <IndexRow id={item.id} user_name={item.UserName} body={item.body}
-             updatedAt={item.updatedAt} userId={userId} user_uid={item.userId}
+             updatedAt={item.dt_str} userId={userId} user_uid={item.userId}
              parentFunc={parentFunc}
               />
           </div>
@@ -204,15 +212,3 @@ console.log(uid);
   );
 }
 export default ChatShow;
-/*
-<div key={item.id}>
-  <span className="fs-5">{item.UserName}</span> <br />
-  <pre className="my-1">{item.body}</pre>
-  <span className="mx-0 text-secondary">{item.updatedAt}</span>, ID: {item.id}
-  <hr className="my-1" />
-  <IndexRow id={item.id} user_name={item.UserName} body={item.body} updatedAt={item.updatedAt} />
-</div>
-<Link href={`/chats/edit?id=${item.id}`}>
-  <a className="btn btn-sm btn-outline-primary mx-2">Edit</a>
-</Link>
-*/
