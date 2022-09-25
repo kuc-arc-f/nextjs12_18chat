@@ -13,13 +13,14 @@ import IndexRow from './IndexRow';
 //
 LibStorage.set_exStorage("auto_update", 1)
 //
-function ChatShow() {
+const ChatShow: React.FC = function () {
   const router = useRouter();
   const queryParamas = router.query;
   const [time, updateTime] = useState(Date.now());
   const [items, setItems] = useState([]);
   const [chatId, setChatId] = useState(0);
   const [userId, setUserId] = useState(0);
+  const [lastCreateTime, setLastCreateTime] = useState("");
 //console.log("chatId=", chatId);  
   const interval = 3000;
   /**
@@ -40,8 +41,11 @@ console.log(uid);
         location.href = '/auth/login';
       }   
       setUserId(Number(uid));   
+      (async() => {
       // @ts-ignore
-      get_items(Number(queryParamas.id));
+        const items = await get_items(Number(queryParamas.id));
+        setItems(items);
+      })()
     }
     LibNotify.validNotification();
   }, [queryParamas, router]);
@@ -51,22 +55,26 @@ console.log(uid);
   *
   * @return
   */
-  const get_items = async function (id: number): Promise<void>
+  const get_items = async function (id: number): Promise<any>
   {
     try{
       const item = {
         chatId: Number(id),
         userId : userId,
       }      
-console.log(item);    
+//console.log(item);    
       const response = await fetch(process.env.MY_API_URL + '/chat_posts/index', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', },
         body: JSON.stringify(item),
       });           
       const json = await response.json();
-      setItems(json.data);
-console.log(json.data);    
+//console.log(json.data); 
+      if(json.data.length > 0) {
+        const row = json.data[0];
+        setLastCreateTime(row.createdAt);
+      }
+      return json.data;
     } catch (e) {
       console.error(e);
       throw new Error('Error , get_items');
@@ -80,11 +88,15 @@ console.log(json.data);
     if(valid) {
       (async() => {
         console.log("#execute_update");
-        await get_items(chatId);
+        const items = await get_items(chatId);
+        setItems(items);
         if(items.length > 0){
           const item: any = items[0];
-//console.log(item.body, item.UserName);
-          sendNotify(item.UserName, item.body);
+//console.log("lastCreateTime", lastCreateTime);
+//console.log(item.body, item.UserName, item.createdAt);
+          if(lastCreateTime !== item.createdAt) {
+            sendNotify(item.UserName, item.body);
+          }
         }
       })()      
     }
@@ -99,7 +111,6 @@ console.log(json.data);
   * @return
   */  
   const sendNotify = function (name: string, body: string) {
-//    LibNotify.displayNotification("title", "Hoge\n AAAA\n BBBB");
     LibNotify.displayNotification(name, body);
   }
   /**
@@ -130,10 +141,29 @@ console.log(json.data);
       elemBody.value = "";
       const json = await res.json();
       console.log(json.ret);
-      get_items(chatId);
+      const items = await get_items(chatId);
+      setItems(items);
     } catch (e) {
       console.log(e);
-      throw new Error('error, addItem');
+      alert("Error, add");
+    }
+  }
+  /**
+  * parentFunc : 下層コンポーネントから呼ぶ関数
+  * @param
+  *
+  * @return
+  */  
+  const parentFunc = async function (id: number) 
+  {
+    try {
+      console.log("parentFunc", id);
+      console.log("chatId", chatId);
+      const items = await get_items(chatId);
+      setItems(items);
+    } catch (e) {
+      console.log(e);
+      throw new Error('error, parentFunc');
     }
   }
 
@@ -150,19 +180,21 @@ console.log(json.data);
           <textarea className="form-control" name="body" id="body" rows={3} />
         </div>
         <div className="col-sm-3">
-          <button className="mt-2 btn btn-outline-primary" onClick={() => addItem()} >
+          <button className="mt-2 btn btn-primary" onClick={() => addItem()} >
             Post</button>
         </div>
       </div>
       <hr />
       <div>
       {items.map((item: any ,index: number) => {
-  //console.log(item.values.title);  created_at
+//console.log("uid=", item.userId);
         {/* uid={item.userId} , */}
         return (
           <div key={item.id}>
             <IndexRow id={item.id} user_name={item.UserName} body={item.body}
-             updatedAt={item.updatedAt} />
+             updatedAt={item.updatedAt} userId={userId} user_uid={item.userId}
+             parentFunc={parentFunc}
+              />
           </div>
         )
       })}        

@@ -147,6 +147,34 @@ console.log(chatParams.STAT, sec, valid , auto_update, chatParams.REMAIN_TIME );
       console.log(e);
       throw new Error('error, convert_users');
     }
-  },  
+  },
+  /**
+  * delete
+  * @param
+  *
+  * @return ret: true(update)
+  */     
+  delete : async function (id: number): Promise<void>
+  {
+    try {
+      const item = {
+        id: id,
+      }
+//console.log(item)      
+      const res = await fetch(process.env.MY_API_URL + '/chat_posts/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json',},
+        body: JSON.stringify(item),
+      });
+      if (res.status != 200) {
+        throw new Error(await res.text());
+      }
+      const json = await res.json();
+      console.log(json.ret);
+    } catch (e) {
+      console.log(e);
+      throw new Error('error, delete');
+    }
+  } 
 }
 export default LibChatPost;
