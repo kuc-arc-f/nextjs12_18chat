@@ -12,6 +12,7 @@ import LibCookie from '@/lib/LibCookie';
 import LibCommon from '@/lib/LibCommon';
 import LibChat from '@/lib/LibChat';
 import IndexRow from './IndexRow';
+//import { exit } from 'process';
 //
 LibStorage.set_exStorage("auto_update", 1)
 //
@@ -24,6 +25,7 @@ const ChatShow: React.FC = function () {
   const [userId, setUserId] = useState(0);
   const [lastCreateTime, setLastCreateTime] = useState("");
   const [chatName, setChatName] = useState("");
+  const [soundUrl, setSoundUrl] = useState("");
 //console.log("chatId=", chatId);  
   const interval = 3000;
   /**
@@ -36,10 +38,13 @@ const ChatShow: React.FC = function () {
     if (!router.isReady) return;
     console.log("#init", queryParamas.id);
     if(queryParamas.id !== 'undefined') {
+      const envUrl = process.env.MY_NOTIFY_SOUND_URL;
+      // @ts-ignore
+      setSoundUrl(envUrl);
       setChatId(Number(queryParamas.id));
       const key = process.env.COOKIE_KEY_USER_ID;
       const uid = LibCookie.getCookie(key);
-//console.log(uid);
+console.log("soundUrl=", envUrl);
       if(uid === null){
         location.href = '/auth/login';
       }   
@@ -98,15 +103,27 @@ console.log(items);
     if(valid) {
       (async() => {
         console.log("#execute_update");
+        const post = await LibChatPost.getLastTime(chatId);
+console.log(post.createdAt);
+        let createdAt = "";
+        if(typeof(post.createdAt) !== 'undefined') {
+          createdAt = post.createdAt;
+        }
+        if(lastCreateTime === createdAt) {
+          return;
+        }
         const items = await get_items(chatId);
         setItems(items);
         if(items.length > 0){
           const item: any = items[0];
 //console.log(item.body, item.UserName, item.createdAt);
-          if(lastCreateTime !== item.createdAt) {
-            sendNotify(item.UserName, item.body);
-          }
-        }
+          sendNotify(item.UserName, item.body);
+          //timeer , sound
+          setTimeout(async () => {
+            console.log("#sound start");
+            await soundPlay();
+          }, 3000);
+        }        
       })()      
     }
     return () => {
@@ -119,8 +136,34 @@ console.log(items);
   *
   * @return
   */  
-  const sendNotify = function (name: string, body: string) {
-    LibNotify.displayNotification(name, body);
+  const sendNotify = async function (name: string, body: string) {
+    try{
+      LibNotify.displayNotification(name, body);
+    } catch (e) {
+      console.error(e);
+      throw new Error('Error , sendNotify');
+    }    
+  }
+  /**
+  * soundPlay:
+  * @param
+  *
+  * @return
+  */
+  const soundPlay = async function (): Promise<void>
+   {
+    try{
+      const validBroser  = LibCommon.getBrowserType();
+//console.log("validBroser=", validBroser);
+      if ( validBroser === "chrome") {
+        const sound = document.querySelector<HTMLAudioElement>('#notify_sound');
+        // @ts-ignore
+        await sound.play();      
+      }
+    } catch (e) {
+      console.error(e);
+      throw new Error('Error , soundPlay');
+    }    
   }
   /**
   * addItem
@@ -177,36 +220,43 @@ console.log(items);
 
   return (
     <Layout>
-      <div className="container bg-light">
-      <h3>{chatName}</h3>
-      ID: {chatId}
-      {/*
-      <button onClick={() => {sendNotify();}}>[testNoti]</button>
-      */}
-      <div className="row">
-        <div className="col-sm-9">
-          <textarea className="form-control" name="body" id="body" rows={3} />
-        </div>
-        <div className="col-sm-3">
-          <button className="mt-2 btn btn-primary" onClick={() => addItem()} >
-            Post</button>
-        </div>
-      </div>
-      <hr />
-      <div>
-      {items.map((item: any ,index: number) => {
-//console.log("uid=", item.userId);
-        {/* uid={item.userId} , */}
-        return (
-          <div key={item.id}>
-            <IndexRow id={item.id} user_name={item.UserName} body={item.body}
-             updatedAt={item.dt_str} userId={userId} user_uid={item.userId}
-             parentFunc={parentFunc}
-              />
+      <div className="container bg-light chat_show_wrap">
+        <h3>{chatName}</h3>
+        ID: {chatId}
+        <hr />
+        {/* notify_sound */}      
+        <audio className="notify_audio" src="/notify.mp3" id="notify_sound"
+        controls></audio>         
+        {/*
+        <button onClick={() => {sendNotify();}}>[testNoti]</button>
+        */}
+        <div className="row">
+          <div className="col-sm-9">
+            <textarea className="form-control" name="body" id="body" rows={3} />
           </div>
-        )
-      })}        
-      </div>
+          <div className="col-sm-3">
+            <button className="mt-2 btn btn-primary" onClick={() => addItem()} >
+              Post</button>
+          </div>
+        </div>
+        <hr />
+        <div>
+        {items.map((item: any ,index: number) => {
+  //console.log("uid=", item.userId);
+          {/* uid={item.userId} , */}
+          return (
+            <div key={item.id}>
+              <IndexRow id={item.id} user_name={item.UserName} body={item.body}
+              updatedAt={item.dt_str} userId={userId} user_uid={item.userId}
+              parentFunc={parentFunc}
+                />
+            </div>
+          )
+        })}  
+        </div>
+        <style>{`
+          .chat_show_wrap .notify_audio{ display: none ;}
+        `}</style>        
       </div>
     </Layout>
   );

@@ -57,5 +57,34 @@ const LibCommon = {
       throw new Error('error, getDatetimeArray');
     }
   },
+  /**
+  * sendNotify
+  * @param
+  *
+  * @return string | null
+  */    
+  getBrowserType: function(): string
+  {
+    let ret = "";
+    const agent = window.navigator.userAgent.toLowerCase()
+
+    if (agent.indexOf("msie") != -1 || agent.indexOf("trident") != -1) {
+      console.log("ブラウザはInternet Explorerです。")
+    } else if (agent.indexOf("edg") != -1 || agent.indexOf("edge") != -1) {
+      console.log("ブラウザはEdgeです。")
+    } else if (agent.indexOf("opr") != -1 || agent.indexOf("opera") != -1) {
+      console.log("ブラウザはOperaです。")
+    } else if (agent.indexOf("chrome") != -1) {
+//      console.log("ブラウザはChromeです。");
+      ret = "chrome";
+    } else if (agent.indexOf("safari") != -1) {
+      console.log("ブラウザはSafariです。")
+    } else if (agent.indexOf("firefox") != -1) {
+      console.log("ブラウザはFireFoxです。")
+    } else if (agent.indexOf("opr") != -1 || agent.indexOf("opera") != -1) {
+      console.log("ブラウザはOperaです。")
+    }    
+    return ret;
+  }
 }
 export default LibCommon

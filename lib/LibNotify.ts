@@ -52,6 +52,7 @@ console.log(permission);
             var options ={
               body: body,
               //icon: 'https://hoge/pwa/images/icon2.png',					                    
+              icon: '/icon.png',					                    
               tag: ''
             };
             var n = new Notification(title,options);

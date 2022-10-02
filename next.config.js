@@ -15,6 +15,7 @@ const nextConfig = {
     CSRF_SECRET: "secret1234",
     MY_API_URL : "http://localhost:4000",
     MY_MAX_USER: 3,
+    MY_NOTIFY_SOUND_URL : "",
   },  
 }
 

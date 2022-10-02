@@ -1,9 +1,9 @@
 import moment from 'moment'
 import LibStorage from './LibStorage';
-
+import LibConfig from './LibConfig'
 // 初期値
 const initParam =  {
-  ACTIVE_UPDATE_SEC: 180,      
+  ACTIVE_UPDATE_SEC: 60,
   STATE_ACTIVE: 1,      
   STATE_NON_ACTIVE: 2,      
   STATE_DISPLAY_ACTIVE: "Active",      
@@ -59,16 +59,6 @@ console.log(chatParams.STAT, sec, valid , auto_update, chatParams.REMAIN_TIME );
 //console.log(time)
     return time
   },
-  /*
-  get_stat_label(stat){
-    const cfg = this.get_params()
-    var ret = cfg.STATE_DISPLAY_NONE
-    if(stat == cfg.STATE_ACTIVE){
-      ret = cfg.STATE_DISPLAY_ACTIVE
-    }   
-    return ret
-  },
-  */
   /**
   * get_next_time :　更新までの残り時間
   * @param
@@ -175,6 +165,39 @@ console.log(chatParams.STAT, sec, valid , auto_update, chatParams.REMAIN_TIME );
       console.log(e);
       throw new Error('error, delete');
     }
-  } 
+  },
+  /**
+  * getLastTime
+  * @param chatId: number
+  *
+  * @return Promise
+  */      
+  getLastTime : async function (chatId: number): Promise<any>
+  {
+    try {
+      let ret = {};
+      const item = {
+        chatId: chatId,
+      }
+//console.log(item)      
+       const res = await fetch(process.env.MY_API_URL + '/chat_posts/get_last_time', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json',},
+         body: JSON.stringify(item),
+       });
+       if (res.status != 200) {
+         throw new Error(await res.text());
+       }
+       const json = await res.json();
+       if(json.ret === LibConfig.OK_CODE) {
+//console.log(json.data);
+        ret = json.data;
+      }
+      return ret;       
+    } catch (e) {
+      console.log(e);
+      throw new Error('error, getLastTime');
+    }
+   },
 }
 export default LibChatPost;
