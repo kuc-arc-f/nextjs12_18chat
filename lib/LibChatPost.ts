@@ -4,6 +4,7 @@ import LibConfig from './LibConfig'
 // 初期値
 const initParam =  {
   ACTIVE_UPDATE_SEC: 60,
+//  ACTIVE_UPDATE_SEC: 30,
   STATE_ACTIVE: 1,      
   STATE_NON_ACTIVE: 2,      
   STATE_DISPLAY_ACTIVE: "Active",      
@@ -199,5 +200,24 @@ console.log(chatParams.STAT, sec, valid , auto_update, chatParams.REMAIN_TIME );
       throw new Error('error, getLastTime');
     }
    },
+  /**
+  * getShowItem
+  * @param items: array
+  * @param id: number
+  *
+  * @return object
+  */     
+   getShowItem : function (items: any, id: number): any
+   {
+    let ret = {};
+    items.forEach(function (item: any){
+//      console.log(item.id, id);
+      if (item.id === id) {
+        ret = item;
+      }
+    });    
+    return ret;
+   }
+
 }
 export default LibChatPost;

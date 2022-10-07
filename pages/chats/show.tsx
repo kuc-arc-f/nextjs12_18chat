@@ -3,6 +3,7 @@
 */
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
+//
 import { useRouter } from "next/router";
 import Layout from '@/components/layout'
 import LibChatPost from '@/lib/LibChatPost'
@@ -12,7 +13,7 @@ import LibCookie from '@/lib/LibCookie';
 import LibCommon from '@/lib/LibCommon';
 import LibChat from '@/lib/LibChat';
 import IndexRow from './IndexRow';
-//import { exit } from 'process';
+import ModalPost from './ModalPost';
 //
 LibStorage.set_exStorage("auto_update", 1)
 //
@@ -26,8 +27,14 @@ const ChatShow: React.FC = function () {
   const [lastCreateTime, setLastCreateTime] = useState("");
   const [chatName, setChatName] = useState("");
   const [soundUrl, setSoundUrl] = useState("");
+  const [modalUserName, setModalUserName] = useState("");
+  const [modalBody, setModalBody] = useState("");
+  const [modalDatetime, setModalDatetime] = useState("");
+  const [modalId, setModalId] = useState(0);
+  const [modaluserId, setmodaluserId] = useState(0);
 //console.log("chatId=", chatId);  
   const interval = 3000;
+
   /**
   * 起動処理
   * @param
@@ -35,6 +42,7 @@ const ChatShow: React.FC = function () {
   * @return
   */  
   useEffect(() => {
+    //import bootstrap from 'bootstrap';
     if (!router.isReady) return;
     console.log("#init", queryParamas.id);
     if(queryParamas.id !== 'undefined') {
@@ -58,6 +66,18 @@ console.log("soundUrl=", envUrl);
 console.log(items);
         setItems(items);
       })()
+      //modal
+      const modalArea = document.getElementById('modalArea');
+      const openModal = document.getElementById('openModal');
+      const closeModal = document.getElementById('closeModal');
+      const modalBg = document.getElementById('modalBg');
+      const toggle = [openModal,closeModal,modalBg];
+      
+      for(let i=0, len=toggle.length ; i<len ; i++){
+        toggle[i]?.addEventListener('click',function(){
+          modalArea?.classList.toggle('is-show');
+        },false);
+      }      
     }
     LibNotify.validNotification();
   }, [queryParamas, router]);
@@ -87,7 +107,8 @@ console.log(items);
         setLastCreateTime(row.createdAt);
       }
       let items = json.data;
-      items = LibCommon.getDatetimeArray(items);
+//      items = LibCommon.getDateArray(items);
+      items = LibCommon.getMmddhmmArray(items);
 //console.log(items);
       return items;
     } catch (e) {
@@ -217,6 +238,30 @@ console.log(post.createdAt);
       throw new Error('error, parentFunc');
     }
   }
+  /**
+  * parentShow : 下層コンポーネントから ダイアログ開く
+  * @param
+  *
+  * @return
+  */
+  const parentShow = async function (id: number) 
+  {
+    try {
+console.log("parentShow", id);
+      const post = LibChatPost.getShowItem(items, id);
+console.log(post);
+      setModalUserName(post.UserName);
+      setModalBody(post.body);
+      setModalDatetime(post.createdAt);
+      setModalId(post.id);
+      setmodaluserId(post.UserId);
+      const btn = document.getElementById("modal_open_button");
+      btn?.click();
+    } catch (e) {
+      console.log(e);
+      throw new Error('error, parentShow');
+    }
+  }
 
   return (
     <Layout>
@@ -248,17 +293,28 @@ console.log(post.createdAt);
             <div key={item.id}>
               <IndexRow id={item.id} user_name={item.UserName} body={item.body}
               updatedAt={item.dt_str} userId={userId} user_uid={item.userId}
-              parentFunc={parentFunc}
+              parentFunc={parentFunc} parentShow={parentShow}
                 />
             </div>
           )
         })}  
         </div>
+        {/* modal  */}
+        <ModalPost id={modalId} user_name={modalUserName} body={modalBody} createdAt={modalDatetime}
+         userId={userId} postUserId={modaluserId} parentFunc={parentFunc} ></ModalPost>        
         <style>{`
           .chat_show_wrap .notify_audio{ display: none ;}
+          .chat_show_wrap .row_trash_icon{ font-size: 1rem; }
+          .chat_show_wrap .pre_text {
+            font-family: BlinkMacSystemFont,Roboto;
+            font-size: 1rem;
+          }
         `}</style>        
       </div>
     </Layout>
   );
 }
 export default ChatShow;
+/*
+"Segoe UI",
+*/
