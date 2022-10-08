@@ -217,7 +217,37 @@ console.log(chatParams.STAT, sec, valid , auto_update, chatParams.REMAIN_TIME );
       }
     });    
     return ret;
-   }
+   },
+  /**
+  * search
+  * @param chatId number
+  * @param searchKey string
+  *
+  * @return
+  */   
+   search : async function (chatId: number, searchKey: string | undefined): Promise<any>
+   {
+    try{
+      const item = {
+        chatId : chatId, seachKey: searchKey, 
+      };
+//console.log(item);
+      const res = await fetch(process.env.MY_API_URL + '/chat_posts/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', },
+        body: JSON.stringify(item),
+      });
+      const json = await res.json();
+      if(json.ret !== LibConfig.OK_CODE ) {
+        throw new Error('Error , search');
+      }
+//console.log(json.data);
+      return json.data;
+    } catch (e) {
+      console.error(e);
+      throw new Error('Error, search');
+    }
+   },
 
 }
 export default LibChatPost;

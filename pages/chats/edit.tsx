@@ -3,10 +3,11 @@ import Router from 'next/router'
 import React, {Component} from 'react';
 
 import LibCookie from "@/lib/LibCookie";
+import LibChat from "@/lib/LibChat";
 import Layout from '@/components/layout'
 
 interface IState {
-  title: string,
+  name: string,
   content: string,
   _token: string,
   userId: string | null,
@@ -22,7 +23,7 @@ export default class ChatEdit extends Component<IProps, IState> {
   constructor(props: any){
     super(props)
     this.state = {
-      title: '', content: '', _token : '', userId: '', button_display: false
+      name: '', content: '', _token : '', userId: '', button_display: false
     }
 console.log(props)
   }
@@ -36,30 +37,33 @@ console.log(props)
   {
     const key = process.env.COOKIE_KEY_USER_ID;
     const uid: string | null = LibCookie.getCookie(key);
-//console.log( "user_id=" , uid)
+console.log( "user_id=" , uid)
     if (uid === null) {
       Router.push('/auth/login');
+      return;
     }
+    const chat = await LibChat.get(Number(this.props.id));
+    console.log(chat);
     this.setState({
-      userId: uid, button_display: true,
+      userId: uid, button_display: true, name: chat.name,
     });    
   }   
   /**
-  * addItem
+  * update
   * @param
   *
   * @return
   */     
-  async addItem(): Promise<void>
+  async update(): Promise<void>
   {
     try {
       const name = document.querySelector<HTMLInputElement>('#name');
       const item = {
         name: name?.value,
         content : '',
-        userId:  this.state.userId,
+        id: Number(this.props.id),
       }
-      const res = await fetch(process.env.MY_API_URL + "/chats/create", {
+      const res = await fetch(process.env.MY_API_URL + "/chats/update", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', },
         body: JSON.stringify(item),
@@ -72,10 +76,28 @@ console.log(props)
       Router.push('/chats');
     } catch (error) {
       console.error(error);
-      alert("Error, addItem")
+      alert("Error, update")
     }    
   } 
-
+  //delete
+  /**
+  * delete
+  * @param
+  *
+  * @return
+  */     
+  async delete(): Promise<void>
+  {
+    try {
+      const chat = await LibChat.delete(Number(this.props.id));
+      console.log(chat);
+      Router.push('/chats');
+    } catch (error) {
+      console.error(error);
+      alert("Error, update")
+    }    
+  }
+  //  
   render() {
 //console.log(this.props);
     return (
@@ -97,12 +119,16 @@ console.log(props)
           <hr className="mt-1 mb-2" />
           <div className="col-md-6 form-group">
             <label>Name:</label>
-            <textarea className="form-control" name="body" id="body" rows={6} />
+            <input type="text" className="form-control" name="name" id="name" 
+            defaultValue={this.state.name}/>
           </div>
           <hr />
           {this.state.button_display ? (
             <div className="form-group my-2">
-              <button className="btn btn-primary" onClick={() => this.addItem()}>Save
+              <button className="btn btn-primary" onClick={() => this.update()}>Save
+              </button>
+              <hr className="my-2" />
+              <button className="btn btn-danger" onClick={() => this.delete()}>Delete
               </button>
             </div>
           ): (<div />)
@@ -120,3 +146,23 @@ console.log(id);
     props: { id: id},
   }
 }
+
+/*
+   async get(): Promise<any>
+   {
+     try {
+       const url = process.env.MY_API_URL + "/chats/show/" + this.props.id;
+       const res = await fetch(url, { method: 'GET',});
+       const json = await res.json();
+       console.log(json);
+       if(json.ret !== 'OK'){
+         throw new Error('Error , fetch');
+       }
+       return json.data;
+     } catch (error) {
+       console.error(error);
+       alert("Error, get")
+     }    
+   } 
+
+*/

@@ -6,7 +6,7 @@
 
  date    : 2022/09/18 
 
- update  : 2022/10/07
+ update  : 2022/10/09
 
 ***
 ### Summary
@@ -14,9 +14,9 @@
 Next.js 12 , chat app sample
 
 ***
-### API server (back)
+### API server / back
 
-https://github.com/kuc-arc-f/express_api_8chat
+https://github.com/kuc-arc-f/express_api_10chat
 
 ***
 ### Setup
@@ -33,10 +33,18 @@ npm install
 
 ***
 ### Start server
-* start :
+* dev-start :
 
 ```
 yarn dev
+```
+
+***
+* start
+```
+yarn build
+
+yarn start
 ```
 
 ***

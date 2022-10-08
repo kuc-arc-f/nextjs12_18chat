@@ -11,6 +11,7 @@ import LibStorage from '@/lib/LibStorage';
 import LibNotify from '@/lib/LibNotify';
 import LibCookie from '@/lib/LibCookie';
 import LibCommon from '@/lib/LibCommon';
+import LibConfig from '@/lib/LibConfig';
 import LibChat from '@/lib/LibChat';
 import IndexRow from './IndexRow';
 import ModalPost from './ModalPost';
@@ -262,12 +263,51 @@ console.log(post);
       throw new Error('error, parentShow');
     }
   }
-
+  /**
+  * clickSearch
+  * @param
+  *
+  * @return
+  */
+  const clickSearch = async function() {
+    try{
+      const searchKey = document.querySelector<HTMLInputElement>('#searchKey');
+      const skey = searchKey?.value;
+      const items = await LibChatPost.search(chatId, skey);
+//      console.log(items);
+      setItems(items);
+    } catch (e) {
+      console.error(e);
+      alert("Error, serach");
+    }      
+  }
+  /**
+  * clickClear
+  * @param
+  *
+  * @return
+  */
+  const clickClear = async function() {
+    try{
+      const searchKey = document.querySelector<HTMLInputElement>('#searchKey');
+      // @ts-ignore
+      searchKey.value = "";
+      const items = await get_items(chatId);
+      setItems(items);
+    } catch (e) {
+      console.error(e);
+      throw new Error('Error , clickClear');
+    }    
+  }
+  //
   return (
     <Layout>
       <div className="container bg-light chat_show_wrap">
-        <h3>{chatName}</h3>
-        ID: {chatId}
+        {/* name */}
+        <div className="row">
+          <div className="col-md-6"><h3>{chatName}</h3></div>
+          <div className="col-md-6">ID: {chatId}</div>
+        </div>
         <hr />
         {/* notify_sound */}      
         <audio className="notify_audio" src="/notify.mp3" id="notify_sound"
@@ -284,7 +324,21 @@ console.log(post);
               Post</button>
           </div>
         </div>
-        <hr />
+        <hr className="my-1" />
+        <div className="row">
+          <div className="col-md-12 pt-1">
+            <button onClick={() => clickClear()} className="btn btn-sm btn-outline-primary">Clear
+            </button>            
+            <span className="search_key_wrap">
+              {/* form-control form-control-sm */}
+              <input type="text" size={36} className="mx-2 " name="searchKey" id="searchKey"
+              placeholder="Search Key" />        
+            </span>
+            <button onClick={() => clickSearch()} className="btn btn-sm btn-outline-primary">Search
+            </button>            
+          </div>
+        </div>
+        <hr className="my-1" />
         <div>
         {items.map((item: any ,index: number) => {
   //console.log("uid=", item.userId);

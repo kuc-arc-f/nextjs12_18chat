@@ -36,7 +36,7 @@ const LibCookie = {
       return ret
     } catch (e) {
       console.log(e);
-      throw new Error('error, get_cookie');
+      throw new Error('error, getCookie');
     }
   },
   /**

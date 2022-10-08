@@ -7,8 +7,10 @@ import LoadingBox from '@/components/LoadingBox'
 import IndexRow from './IndexRow';
 import LibPagenate from '@/lib/LibPagenate';
 import LibCookie from '@/lib/LibCookie'
+import LibChat from '@/lib/LibChat';
 
 const perPage = 100;
+//
 interface IProps {
   items: Array<object>,
   history:string[],
@@ -17,29 +19,24 @@ interface IProps {
 interface IState {
   items: any[],
   items_all: any[],
-  itemsNone: any[],
-  itemsWorking: any[],
-  itemsComplete: any[],
-//  category: string,
   perPage: number,
   offset: number,
   pageCount: number,
   button_display: boolean,
-  userId: string | null,
+  userId: number | null,
   type_complete: number,
   project: any,
 }
 //
-export default class TaskIndex extends React.Component<IProps, IState> {
+export default class ChatIndex extends React.Component<IProps, IState> {
   constructor(props: any){
     super(props)
     this.state = {
-      itemsNone:[], itemsWorking:[], itemsComplete:[],
       items: [], items_all: [], perPage: 10, offset: 0, pageCount: 0, 
-      button_display: false, userId: '', type_complete: 0,
+      button_display: false, userId: 0, type_complete: 0,
       project: {}
      };
-console.log(props);   
+//console.log(props);  
   }
   /**
   * componentDidMount
@@ -52,25 +49,59 @@ console.log(props);
     const key = process.env.COOKIE_KEY_USER_ID;
     const uid = LibCookie.getCookie(key);
 console.log(uid);
-//console.log(url);
     if(uid === null){
       location.href = '/auth/login';
+      return;
     }
-    const url = process.env.MY_API_URL + "/chats/index";
-    const response = await fetch(url);
-    const json = await response.json();
-console.log(json.data);
-    //items = json.data;    
+    const items = await LibChat.getItems();
+console.log(items);
     this.setState({
-      items: json.data, items_all: [], button_display: true, pageCount: 0,
-      userId: uid,  project: {}, 
+      items: items, items_all: [], button_display: true, pageCount: 0,
+      userId: Number(uid),  project: {}, 
     })  
-
   }
+  /**
+  * clickClear
+  * @param
+  *
+  * @return
+  */  
+  async clickClear() {
+    try {
+      const searchKey = document.querySelector<HTMLInputElement>('#searchKey');
+      // @ts-ignore
+      searchKey.value = "";
+      const items = await LibChat.getItems();
+console.log(items); 
+      this.setState({ items: items});
+    } catch (e) {
+      console.error(e);
+      throw new Error('Error , clickClear');
+    } 
+  }
+  /**
+  * clickSearch
+  * @param
+  *
+  * @return
+  */  
+  async clickSearch() {
+    try {
+      const searchKey = document.querySelector<HTMLInputElement>('#searchKey');
+      // @ts-ignore
+      const skey = searchKey.value;
+      const items = await LibChat.search(skey);
+//console.log(items);
+      this.setState({ items: items }); 
+    } catch (e) {
+      console.error(e);
+      throw new Error('Error , clickClear');
+    } 
+  }
+  //
   render(){
     const data = this.state.items;
-//    const project = this.state.project;
-console.log(data);
+//console.log(this.state.userId);
     return(
     <Layout>
       <>
@@ -90,18 +121,40 @@ console.log(data);
         </div>
         <hr className="my-1" />
         <div className="row">
+          <div className="col-md-12 pt-1">
+            <button onClick={() => this.clickClear()} className="btn btn-sm btn-outline-primary">Clear
+            </button>            
+            <span className="search_key_wrap">
+              {/* form-control form-control-sm */}
+              <input type="text" size={36} className="mx-2 " name="searchKey" id="searchKey"
+              placeholder="Search Key" />        
+            </span>
+            <button onClick={() => this.clickSearch()} className="btn btn-sm btn-outline-primary">Search
+            </button>            
+          </div>
+        </div>        
+        <hr className="my-1" />
+        <div className="row">
           <div className="col-md-12">
           {this.state.items.map((item: any ,index: number) => {
-    //console.log(item.values.title);  created_at
+//console.log(item.userId, this.state.userId);
             return (
               <div key={item.id}>
                 <Link  href={`/chats/show?id=${item.id}`}>
-                  <a>
-                    <span className="task_title fs-5"><h3 className="py-1">{item.name}</h3>
+                  <a><span className="task_title fs-5"><h3 className="py-1">{item.name}</h3>
                     </span>
-                    ID : {item.id}
                   </a>
                 </Link>
+                <span>ID: {item.id}</span>
+                {this.state.userId === item.userId ? (
+                  <Link  href={`/chats/edit?id=${item.id}`}>
+                    <a><span className="btn btn-sm btn-outline-primary mx-2">Edit
+                      </span>
+                    </a>
+                  </Link>                
+                ): (
+                  <span></span>
+                )}                 
                 <hr />
               </div>
             )
@@ -112,13 +165,6 @@ console.log(data);
         <hr />
       </div>
       <style>{`
-      .card_col_body{ text-align: left; width: 100%;}
-      .card_col_icon{ font-size: 1.4rem; }
-      .task_index_row .task_card_bg_blue{ background : #E3F2FD; }      
-      .task_index_row .task_card_bg_gray{ background : #FFF3E0; }
-      .task_index_row .card-body{ padding: 0.2rem; } 
-      .task_index_row .task_title{ margin-bottom: 0.1rem; }  
-      .task_index_row .task_date_area{ }   
       `}</style>
       </>
       {/* font-size: 2.4rem;*/}
