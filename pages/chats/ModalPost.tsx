@@ -1,15 +1,21 @@
 import Link from 'next/link';
+import React, { useEffect, useState } from 'react';
 import LibCommon from '@/lib/LibCommon';
 import LibChatPost from '@/lib/LibChatPost'
+import LibThread from '@/lib/LibThread'
+import LibBookMark from '@/lib/LibBookMark'
 //Types
 interface IProps {
   id: number,
+  chatId: number,
   userId: number, // Login userId
-  user_name : string,
+  user_name: string,
   postUserId: number,
   body: string,
   createdAt: any,
   parentFunc: any,
+  parentThreadAdd: any,
+  modalThreadItems: any[],
 }
 
 /**
@@ -19,18 +25,19 @@ interface IProps {
 * @return
 */
 const ModalPost: React.FC<IProps> = function (props: any) {
+  const [items, setItems] = useState([]);
   let createdAt = props.createdAt;
   createdAt = LibCommon.converDatetimeString(createdAt);
-//console.log(props.postUserId, props.userId);
+//console.log(props.modalThreadItems);
   /**
   * childDeleteItem : 投稿の削除
   * @param
   *
   * @return
-  */ 
-   const childDeleteItem = async function () {
-    try{
-console.log("childDeleteItem");
+  */
+  const childDeleteItem = async function () {
+    try {
+      console.log("childDeleteItem");
       const btn = document.getElementById("modal_close_button");
       btn?.click();
       await LibChatPost.delete(props.id);
@@ -40,17 +47,69 @@ console.log("childDeleteItem");
       alert("Error, childDeleteItem");
     }
   }
+  /**
+  * deleteThread : threadの削除
+  * @param
+  *
+  * @return
+  */  
+  const deleteThread = async function (threadId: number) {
+    try {
+console.log("deleteThread");
+      await LibThread.delete(threadId);
+      await props.parentThreadAdd(props.id);      
+    } catch (e) {
+      console.error(e);
+      alert("Error, deleteThread");
+    }
+  }
+  /**
+  * createReply :
+  * @param
+  *
+  * @return
+  */
+  const createReply = async function () {
+    try {
+      const body = document.querySelector<HTMLInputElement>('#modal_reply_body');
+      const bodyString = body?.value; 
+      await LibThread.create(props.id, bodyString, props.chatId, props.userId);
+      props.parentThreadAdd(props.id);
+      //@ts-ignore
+      body.value = "";
+//console.log(items);
+    } catch (e) {
+      console.error(e);
+      alert("Error, createReply");
+    }
+  }
+  /**
+  * createReply :
+  * @param
+  *
+  * @return
+  */  
+  const addBookMark = async function () {
+    try {
+      await LibBookMark.create(props.id, props.chatId, props.userId);
+      alert("Complete, BookMark add");
+//console.log(items);
+    } catch (e) {
+      console.error(e);
+      alert("Error, addBookMark");
+    }
+  };
   //
   return (
-    <div className="row justify-content-center"> 
+    <div className="row justify-content-center modal_post_wrap">
       {/* button */}
       <button type="button" id="modal_open_button" className="btn btn-primary"
-       data-bs-toggle="modal" data-bs-target="#exampleModal">
+        data-bs-toggle="modal" data-bs-target="#exampleModal">
         Launch demo modal
       </button>
       {/* Modal */}
       <div className="modal fade" id="exampleModal" aria-labelledby="exampleModalLabel"
-	      aria-hidden="true">
+        aria-hidden="true">
         <div className="modal-dialog modal-lg">
           <div className="modal-content">
             <div className="modal-header">
@@ -62,16 +121,53 @@ console.log("childDeleteItem");
               <pre className="pre_text">{props.body}</pre>
               <hr className="my-1" />
               <span className="mx-2">ID: {props.id}</span>
+              <hr className="my-1" />
+              <div className="row">
+                <div className="col-sm-9"><textarea className="form-control" id="modal_reply_body" rows={2} />
+                </div>
+                <div className="col-sm-3">
+                  <button className="mt-2 btn btn-primary" onClick={() => createReply()} >
+                    Reply</button>
+                </div>
+              </div>
+              <hr className="my-1" />
+              <div className="row">
+              {props.modalThreadItems ? (
+                props.modalThreadItems.map((item: any ,index: number) => {
+ //console.log("uid=", item.id, item.userId);
+                  const threadCreatedAt = LibCommon.converDatetimeString(item.createdAt);
+                  return (
+                    <div key={item.id}>
+                      <span className="fs-5">{item.UserName}</span> 
+                      <span className="mx-2">{threadCreatedAt}</span>
+                      {props.userId === item.userId ? (
+                        <button type="button" className="btn btn-sm btn-outline-danger mx-2"
+                          onClick={() => deleteThread(item.id)} ><i className="bi bi-trash-fill"></i>
+                        </button>
+                      ) : (
+                        <span></span>
+                      )}
+                      <br />
+                      <pre className="mb-1">{item.body}</pre>
+                      <hr className="my-1" />
+                    </div>
+                  )                  
+                })
+              )
+              : ""}
+              </div>
             </div>
             <div className="modal-footer">
+              <button type="button" className="btn btn-outline-primary" onClick={() => addBookMark()}
+                >BookMark</button>              
               {props.userId === props.postUserId ? (
                 <button type="button" className="btn btn-outline-danger" onClick={() => childDeleteItem()}
                 >Delete</button>
-              ): (
+              ) : (
                 <span></span>
-              )}              
+              )}
               <button type="button" className="btn btn-secondary" data-bs-dismiss="modal"
-              id="modal_close_button">Close
+                id="modal_close_button">Close
               </button>
             </div>
           </div>
@@ -79,9 +175,10 @@ console.log("childDeleteItem");
       </div>
       <style>{`
         #modal_open_button { display: none ;}
-      `}</style>              
+        .modal_post_wrap .bi {font-size: 0.8rem;}
+      `}</style>
     </div>
   )
 }
-;
+  ;
 export default ModalPost;

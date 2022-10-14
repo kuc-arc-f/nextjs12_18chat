@@ -11,10 +11,9 @@ import LibStorage from '@/lib/LibStorage';
 import LibNotify from '@/lib/LibNotify';
 import LibCookie from '@/lib/LibCookie';
 import LibCommon from '@/lib/LibCommon';
-import LibConfig from '@/lib/LibConfig';
 import LibChat from '@/lib/LibChat';
 import LibThread from '@/lib/LibThread';
-import IndexRow from './IndexRow';
+import BookMarkRow from './BookMarkRow';
 import ModalPost from './ModalPost';
 //
 LibStorage.set_exStorage("auto_update", 1)
@@ -45,6 +44,7 @@ const ChatShow: React.FC = function () {
   * @return
   */  
   useEffect(() => {
+    //import bootstrap from 'bootstrap';
     if (!router.isReady) return;
     console.log("#init", queryParamas.id);
     if(queryParamas.id !== 'undefined') {
@@ -54,22 +54,17 @@ const ChatShow: React.FC = function () {
       setChatId(Number(queryParamas.id));
       const key = process.env.COOKIE_KEY_USER_ID;
       const uid = LibCookie.getCookie(key);
-console.log("soundUrl=", envUrl);
+//console.log("soundUrl=", envUrl);
       if(uid === null){
         location.href = '/auth/login';
       }   
-      setUserId(Number(uid));
-      //set chat_id
-      const keyChatId = process.env.MY_LAST_CHAT_ID;
-      LibCookie.setCookie(keyChatId, String(queryParamas.id));
-
+      setUserId(Number(uid));   
       (async() => {
         const chat = await LibChat.get(Number(queryParamas.id));
         setChatName(chat.name);
-//console.log(chatName);
         // @ts-ignore
-        const items = await get_items(Number(queryParamas.id));
-console.log(items);
+        const items = await get_items(Number(queryParamas.id), Number(uid));
+//console.log(items);
         setItems(items);
       })()
       //modal
@@ -93,15 +88,15 @@ console.log(items);
   *
   * @return
   */
-  const get_items = async function (id: number): Promise<any>
+  const get_items = async function (id: number, userId: number): Promise<any>
   {
     try{
       const item = {
         chatId: Number(id),
         userId : userId,
       }      
-//console.log(item);    
-      const response = await fetch(process.env.MY_API_URL + '/chat_posts/index', {
+//console.log(item);   
+      const response = await fetch(process.env.MY_API_URL + '/book_marks/index', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', },
         body: JSON.stringify(item),
@@ -113,7 +108,6 @@ console.log(items);
         setLastCreateTime(row.createdAt);
       }
       let items = json.data;
-//      items = LibCommon.getDateArray(items);
       items = LibCommon.getMmddhmmArray(items);
 //console.log(items);
       return items;
@@ -122,122 +116,17 @@ console.log(items);
       throw new Error('Error , get_items');
     }
   }
-  //timer
-  useEffect(() => {
-    const timeoutId: any = setTimeout(() => updateTime(Date.now()), interval);
-    let valid = LibChatPost.postUpdate();
-//console.log("show.valid=", valid);
-    if(valid) {
-      (async() => {
-        console.log("#execute_update");
-        const post = await LibChatPost.getLastTime(chatId);
-console.log(post.createdAt);
-        let createdAt = "";
-        if(typeof(post.createdAt) !== 'undefined') {
-          createdAt = post.createdAt;
-        }
-        if(lastCreateTime === createdAt) {
-          return;
-        }
-        const items = await get_items(chatId);
-        setItems(items);
-        if(items.length > 0){
-          const item: any = items[0];
-//console.log(item.body, item.UserName, item.createdAt);
-          sendNotify(item.UserName, item.body);
-          //timeer , sound
-          setTimeout(async () => {
-            console.log("#sound start");
-            await soundPlay();
-          }, 3000);
-        }        
-      })()      
-    }
-    return () => {
-        clearTimeout(timeoutId);
-    };
-  }, [time]); // eslint-disable-line react-hooks/exhaustive-deps
-  /**
-  * sendNotify: 通知APIの起動
-  * @param body : string
-  *
-  * @return
-  */  
-  const sendNotify = async function (name: string, body: string) {
-    try{
-      LibNotify.displayNotification(name, body);
-    } catch (e) {
-      console.error(e);
-      throw new Error('Error , sendNotify');
-    }    
-  }
-  /**
-  * soundPlay:
-  * @param
-  *
-  * @return
-  */
-  const soundPlay = async function (): Promise<void>
-   {
-    try{
-      const validBroser  = LibCommon.getBrowserType();
-//console.log("validBroser=", validBroser);
-      if ( validBroser === "chrome") {
-        const sound = document.querySelector<HTMLAudioElement>('#notify_sound');
-        // @ts-ignore
-        await sound.play();      
-      }
-    } catch (e) {
-      console.error(e);
-      throw new Error('Error , soundPlay');
-    }    
-  }
-  /**
-  * addItem
-  * @param
-  *
-  * @return
-  */   
-  const addItem = async function () {
-    try {
-      const elemBody = document.querySelector<HTMLInputElement>('#body');
-      const item = {
-        title: '',
-        chatId: chatId,
-        body: elemBody?.value,
-        userId : userId,
-      }
-  console.log(item)      
-      const res = await fetch(process.env.MY_API_URL + '/chat_posts/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json',},
-        body: JSON.stringify(item),
-      });
-      if (res.status != 200) {
-        throw new Error(await res.text());
-      }
-      // @ts-ignore
-      elemBody.value = "";
-      const json = await res.json();
-      console.log(json.ret);
-      const items = await get_items(chatId);
-      setItems(items);
-    } catch (e) {
-      console.log(e);
-      alert("Error, add");
-    }
-  }
   /**
   * parentFunc : 下層コンポーネントから呼ぶ関数
   * @param
   *
   * @return
   */  
-  const parentFunc = async function (id: number) 
+  const parentFunc = async function () 
   {
     try {
 //console.log("parentFunc", id);
-      const items = await get_items(chatId);
+      const items = await get_items(chatId, userId);
       setItems(items);
     } catch (e) {
       console.log(e);
@@ -256,9 +145,9 @@ console.log(post.createdAt);
 console.log("parentShow", id);
       setModalThreadItems([]);
       const post = LibChatPost.getShowItem(items, id);
-console.log(post);
+//console.log(post);
       setModalUserName(post.UserName);
-      setModalBody(post.body);
+      setModalBody(post.Body);
       setModalDatetime(post.createdAt);
       setModalId(post.id);
       setmodaluserId(post.UserId);
@@ -266,7 +155,7 @@ console.log(post);
       btn?.click();
       //thread
       const thread = await LibThread.getItems(id);
-console.log(thread);
+//console.log(thread);
       setModalThreadItems(thread);
     } catch (e) {
       console.log(e);
@@ -290,97 +179,36 @@ console.log(thread);
       throw new Error('error, parentThreadAdd');
     }    
   }
-  /**
-  * clickSearch
-  * @param
-  *
-  * @return
-  */
-  const clickSearch = async function() {
-    try{
-      const searchKey = document.querySelector<HTMLInputElement>('#searchKey');
-      const skey = searchKey?.value;
-      const items = await LibChatPost.search(chatId, skey);
-//      console.log(items);
-      setItems(items);
-    } catch (e) {
-      console.error(e);
-      alert("Error, serach");
-    }      
-  }
-  /**
-  * clickClear
-  * @param
-  *
-  * @return
-  */
-  const clickClear = async function() {
-    try{
-      const searchKey = document.querySelector<HTMLInputElement>('#searchKey');
-      // @ts-ignore
-      searchKey.value = "";
-      const items = await get_items(chatId);
-      setItems(items);
-    } catch (e) {
-      console.error(e);
-      throw new Error('Error , clickClear');
-    }    
-  }
   //
   return (
     <Layout>
       <div className="container bg-light chat_show_wrap">
-        {/* notify_sound */}      
-        <audio className="notify_audio" src="/notify.mp3" id="notify_sound"
-        controls></audio>         
         {/* name */}
         <div className="row">
-          <div className="col-md-6"><h3>{chatName}</h3></div>
-          <div className="col-md-6">ID: {chatId}</div>
+          <div className="col-md-6"><h3>BookMark : {chatName}</h3></div>
+          <div className="col-md-6 text-end">ID: {chatId}</div>
         </div>
         <hr className="my-1" />
         <div className="row">
           <div className="col-md-12 text-center">
-            <Link href={`/chats/book_mark?id=${chatId}`}><a>[ BookMark ]</a>
+            <Link href={`/chats/show?id=${chatId}`}><a>[ Post ]</a>
             </Link>
           </div>
-        </div>
-        {/*
-          <div className="col-md-6 text-center">[ Thread ]</div>
-        */}
-        <hr className="my-1" />
-        <div className="row">
-          <div className="col-sm-9">
-            <textarea className="form-control" name="body" id="body" rows={3} />
+          {/*
+          <div className="col-md-6 text-center">[ Thread ]
           </div>
-          <div className="col-sm-3">
-            <button className="mt-2 btn btn-primary" onClick={() => addItem()} >
-              Post</button>
-          </div>
+          */}
         </div>
-        <hr className="my-1" />
-        <div className="row">
-          <div className="col-md-12 pt-1">
-            <button onClick={() => clickClear()} className="btn btn-sm btn-outline-primary">Clear
-            </button>            
-            <span className="search_key_wrap">
-              {/* form-control form-control-sm */}
-              <input type="text" size={36} className="mx-2 " name="searchKey" id="searchKey"
-              placeholder="Search Key" />        
-            </span>
-            <button onClick={() => clickSearch()} className="btn btn-sm btn-outline-primary">Search
-            </button>            
-          </div>
-        </div>
-        <hr className="my-1" />
+        <hr className="my-1" />        
         {/* Post */}
         <div>
         {items.map((item: any ,index: number) => {
-  //console.log("uid=", item.userId);
+//console.log("BookMarkId=", item.BookMarkId);
           return (
-            <div key={item.id}>
-              <IndexRow id={item.id} user_name={item.UserName} body={item.body}
+            <div key={item.BookMarkId}>
+              <BookMarkRow id={item.id} user_name={item.UserName} body={item.Body}
               updatedAt={item.dt_str} userId={userId} user_uid={item.userId}
+              BookMarkId={item.BookMarkId}
               parentFunc={parentFunc} parentShow={parentShow}
                 />
             </div>
@@ -405,6 +233,3 @@ console.log(thread);
   );
 }
 export default ChatShow;
-/*
-"Segoe UI",
-*/

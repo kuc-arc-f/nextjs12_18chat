@@ -3,8 +3,11 @@ import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import Layout from '@/components/layout'
+import TopChatRow from './TopChatRow'
+// TopChatRow
 
 const Home: NextPage = () => {
+//  const key = process.env.MY_LAST_CHAT_ID;
   return (
     <Layout>
     <div className={styles.container}>
@@ -14,6 +17,8 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <h1>Top</h1>
+      <hr />
+      <TopChatRow ></TopChatRow>
     </div>
     </Layout>
   )

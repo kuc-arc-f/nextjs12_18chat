@@ -12,6 +12,7 @@ const nextConfig = {
     APP_NAME: "ChatApp",
     MAX_USER_LIMIT: 5,
     COOKIE_KEY_USER_ID: "uid_chat2022",
+    MY_LAST_CHAT_ID: "chat2022_last_chat",
     CSRF_SECRET: "secret1234",
     MY_API_URL : "http://localhost:4000",
     MY_MAX_USER: 3,

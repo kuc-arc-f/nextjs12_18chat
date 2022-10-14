@@ -7,7 +7,7 @@ const LibCookie = {
   *
   * @return Promise<any>
   */    
-  setCookie: function(key: string, value: string) {
+  setCookie: function(key: string | undefined, value: string) {
     try{
       const dt = moment().add(10, 'year').toDate().toUTCString()
 

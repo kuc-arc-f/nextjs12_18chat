@@ -1,12 +1,12 @@
 ﻿# nextjs12_18chat
 
- Version: 0.9.1
+ Version: 0.9.2
 
  Author  : Kouji Nakashima / kuc-arc-f.com
 
  date    : 2022/09/18 
 
- update  : 2022/10/09
+ update  : 2022/10/14
 
 ***
 ### Summary
@@ -16,7 +16,7 @@ Next.js 12 , chat app sample
 ***
 ### API server / back
 
-https://github.com/kuc-arc-f/express_api_10chat
+https://github.com/kuc-arc-f/express_api_12chat
 
 ***
 ### Setup
@@ -49,7 +49,7 @@ yarn start
 
 ***
 ### Blog:
-* Next.js で、chat(チャット)
+* Next.js で、chat (チャット)
 
 https://zenn.dev/knaka0209/articles/c5b90d4d9b6df2
 
