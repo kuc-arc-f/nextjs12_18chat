@@ -13,21 +13,18 @@ import LibCookie from '@/lib/LibCookie';
 import LibCommon from '@/lib/LibCommon';
 import LibChat from '@/lib/LibChat';
 import LibThread from '@/lib/LibThread';
-import BookMarkRow from './BookMarkRow';
+import ThreadRow from './ThreadRow';
 import ModalPost from './ModalPost';
 //
 LibStorage.set_exStorage("auto_update", 1)
 //
-const ChatShow: React.FC = function () {
+const ThreadList: React.FC = function () {
   const router = useRouter();
   const queryParamas = router.query;
-  const [time, updateTime] = useState(Date.now());
   const [items, setItems] = useState([]);
   const [chatId, setChatId] = useState(0);
   const [userId, setUserId] = useState(0);
-  const [lastCreateTime, setLastCreateTime] = useState("");
   const [chatName, setChatName] = useState("");
-  const [soundUrl, setSoundUrl] = useState("");
   const [modalUserName, setModalUserName] = useState("");
   const [modalBody, setModalBody] = useState("");
   const [modalDatetime, setModalDatetime] = useState("");
@@ -35,7 +32,6 @@ const ChatShow: React.FC = function () {
   const [modaluserId, setmodaluserId] = useState(0);
   const [modalThreadItems, setModalThreadItems] = useState([]);
 //console.log("chatId=", chatId);  
-  const interval = 3000;
 
   /**
   * 起動処理
@@ -50,7 +46,7 @@ const ChatShow: React.FC = function () {
     if(queryParamas.id !== 'undefined') {
       const envUrl = process.env.MY_NOTIFY_SOUND_URL;
       // @ts-ignore
-      setSoundUrl(envUrl);
+//      setSoundUrl(envUrl);
       setChatId(Number(queryParamas.id));
       const key = process.env.COOKIE_KEY_USER_ID;
       const uid = LibCookie.getCookie(key);
@@ -67,18 +63,6 @@ const ChatShow: React.FC = function () {
 //console.log(items);
         setItems(items);
       })()
-      //modal
-      const modalArea = document.getElementById('modalArea');
-      const openModal = document.getElementById('openModal');
-      const closeModal = document.getElementById('closeModal');
-      const modalBg = document.getElementById('modalBg');
-      const toggle = [openModal,closeModal,modalBg];
-      
-      for(let i=0, len=toggle.length ; i<len ; i++){
-        toggle[i]?.addEventListener('click',function(){
-          modalArea?.classList.toggle('is-show');
-        },false);
-      }      
     }
     LibNotify.validNotification();
   }, [queryParamas, router]);
@@ -96,17 +80,13 @@ const ChatShow: React.FC = function () {
         userId : userId,
       }      
 //console.log(item);   
-      const response = await fetch(process.env.MY_API_URL + '/book_marks/index', {
+      const response = await fetch(process.env.MY_API_URL + '/thread/index_chats', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', },
         body: JSON.stringify(item),
       });           
       const json = await response.json();
 //console.log(json.data); 
-      if(json.data.length > 0) {
-        const row = json.data[0];
-        setLastCreateTime(row.createdAt);
-      }
       let items = json.data;
       items = LibCommon.getMmddhmmArray(items);
 //console.log(items);
@@ -144,13 +124,14 @@ const ChatShow: React.FC = function () {
     try {
 console.log("parentShow", id);
       setModalThreadItems([]);
-      const post = LibChatPost.getShowItem(items, id);
-//console.log(post);
+      const post = await LibChatPost.getPostItem(id);
+console.log(post);
+//return;
       setModalUserName(post.UserName);
-      setModalBody(post.Body);
+      setModalBody(post.body);
       setModalDatetime(post.createdAt);
       setModalId(post.id);
-      setmodaluserId(post.UserId);
+      setmodaluserId(post.userId);
       const btn = document.getElementById("modal_open_button");
       btn?.click();
       //thread
@@ -185,7 +166,7 @@ console.log(thread);
       <div className="container bg-light chat_show_wrap">
         {/* name */}
         <div className="row">
-          <div className="col-md-6"><h3>BookMark : {chatName}</h3></div>
+          <div className="col-md-6"><h3>Thread : {chatName}</h3></div>
           <div className="col-md-6 text-end">ID: {chatId}</div>
         </div>
         <hr className="my-1" />
@@ -195,22 +176,21 @@ console.log(thread);
             </Link>
           </div>
           <div className="col-md-6 text-center">
-            <Link href={`/chats/thread?id=${chatId}`}><a>[ Thread ]</a>
+            <Link href={`/chats/book_mark?id=${chatId}`}><a>[ BookMark ]</a>
             </Link>
           </div>
-          {/*
-          */}
         </div>
         <hr className="my-1" />        
         {/* Post */}
         <div>
         {items.map((item: any ,index: number) => {
+//console.log(item);
 //console.log("BookMarkId=", item.BookMarkId);
-          return (
-            <div key={item.BookMarkId}>
-              <BookMarkRow id={item.id} user_name={item.UserName} body={item.Body}
+        return (
+            <div key={item.id}>
+              <ThreadRow id={item.id} user_name={item.UserName} body={item.body}
               updatedAt={item.dt_str} userId={userId} user_uid={item.userId}
-              BookMarkId={item.BookMarkId}
+              chatPostId={item.chatPostId}
               parentFunc={parentFunc} parentShow={parentShow}
                 />
             </div>
@@ -234,4 +214,4 @@ console.log(thread);
     </Layout>
   );
 }
-export default ChatShow;
+export default ThreadList;

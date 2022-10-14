@@ -168,6 +168,33 @@ console.log(chatParams.STAT, sec, valid , auto_update, chatParams.REMAIN_TIME );
     }
   },
   /**
+  * getPostItem
+  * @param
+  *
+  * @return
+  */    
+  getPostItem : async function (id: number): Promise<any>
+  {
+    try {
+      let ret = {};
+      const res = await fetch(process.env.MY_API_URL + '/chat_posts/show/' + id, {
+        method: 'GET',
+      });
+      if (res.status != 200) {
+        throw new Error(await res.text());
+      }
+      const json = await res.json();
+      if(json.ret === LibConfig.OK_CODE) {
+//console.log(json.data);
+          ret = json.data;
+      }
+      return ret;
+    } catch (e) {
+      console.log(e);
+      throw new Error('error, getPostItem');
+    }
+  },  
+  /**
   * getLastTime
   * @param chatId: number
   *

@@ -1,10 +1,11 @@
 import Link from 'next/link';
-import LibChatPost from '@/lib/LibChatPost'
+//import LibChatPost from '@/lib/LibChatPost'
 import LibBookMark from '@/lib/LibBookMark'
 //Types
 interface IProps {
   id: number,
-  BookMarkId: number,
+//  BookMarkId: number,
+  chatPostId: number,
   user_name: string,
   body: string,
   updatedAt: any,
@@ -15,12 +16,12 @@ interface IProps {
 }
 
 /**
-* BookMarkRow
+* ThreadRow
 * @param
 *
 * @return
 */
-const BookMarkRow: React.FC<IProps> = function (props: any) {
+const ThreadRow: React.FC<IProps> = function (props: any) {
   /**
   * bmDelete :
   * @param
@@ -30,7 +31,6 @@ const BookMarkRow: React.FC<IProps> = function (props: any) {
   const bmDelete = async function() {
     try{
       await LibBookMark.delete(props.BookMarkId);
-//console.log("bmDelete");
       await props.parentFunc(); 
     } catch (e) {
       console.error(e);
@@ -45,8 +45,8 @@ const BookMarkRow: React.FC<IProps> = function (props: any) {
   */  
   const showItem = async function () {
     try{
-console.log("showItem");
-      props.parentShow(props.id);
+console.log("showItem", props.chatPostId);
+      props.parentShow(props.chatPostId);
     } catch (e) {
       console.error(e);
       alert("Error, delete NG");
@@ -64,16 +64,13 @@ console.log("showItem");
       <button className="btn btn-sm btn-outline-secondary"
         onClick={() => bmDelete()} ><i className="bi bi-trash-fill"></i>
       </button>      
-      {/*
-      {props.BookMarkId}
-      */}
     </div>
     <div className="card-footer text-muted text-center">
       <button className="btn btn-sm btn-primary"
-        onClick={() => showItem()} >More</button>
+        onClick={() => showItem()} >Recent Post</button>
     </div>    
   </div>      
   )
 }
 ;
-export default BookMarkRow;
+export default ThreadRow;

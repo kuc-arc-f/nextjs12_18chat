@@ -340,13 +340,16 @@ console.log(thread);
         </div>
         <hr className="my-1" />
         <div className="row">
-          <div className="col-md-12 text-center">
+          <div className="col-md-6 text-center">
+            <Link href={`/chats/thread?id=${chatId}`}><a>[ Thread ]</a>
+            </Link>          
+          </div>
+          <div className="col-md-6 text-center">
             <Link href={`/chats/book_mark?id=${chatId}`}><a>[ BookMark ]</a>
             </Link>
           </div>
         </div>
         {/*
-          <div className="col-md-6 text-center">[ Thread ]</div>
         */}
         <hr className="my-1" />
         <div className="row">

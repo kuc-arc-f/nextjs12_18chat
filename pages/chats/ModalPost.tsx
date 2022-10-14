@@ -141,7 +141,7 @@ console.log("deleteThread");
                       <span className="fs-5">{item.UserName}</span> 
                       <span className="mx-2">{threadCreatedAt}</span>
                       {props.userId === item.userId ? (
-                        <button type="button" className="btn btn-sm btn-outline-danger mx-2"
+                        <button type="button" className="btn btn-sm btn-outline-secondary mx-2"
                           onClick={() => deleteThread(item.id)} ><i className="bi bi-trash-fill"></i>
                         </button>
                       ) : (

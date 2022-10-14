@@ -26,7 +26,7 @@ const LibThread = {
         throw new Error(await res.text());
       }
       const json = await res.json();
-console.log(json);
+//console.log(json);
       return json.data;
     } catch (e) {
       console.error(e);
