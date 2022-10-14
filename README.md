@@ -16,7 +16,7 @@ Next.js 12 , chat app sample
 ***
 ### API server / back
 
-https://github.com/kuc-arc-f/express_api_10chat
+https://github.com/kuc-arc-f/express_api_12chat
 
 ***
 ### Setup
