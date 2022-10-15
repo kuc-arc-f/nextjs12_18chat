@@ -61,11 +61,13 @@ console.log("showItem");
       <hr className="my-1" />
       <span className="mx-0 text-secondary">{props.updatedAt}</span>
       <span className="mx-2">ID: {props.id}</span>
-      <button className="btn btn-sm btn-outline-secondary"
+      {props.userId === props.user_uid ? (
+        <button className="btn btn-sm btn-outline-secondary"
         onClick={() => bmDelete()} ><i className="bi bi-trash-fill"></i>
-      </button>      
+        </button>      
+      ) 
+      : ""}
       {/*
-      {props.BookMarkId}
       */}
     </div>
     <div className="card-footer text-muted text-center">

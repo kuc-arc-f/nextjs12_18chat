@@ -158,10 +158,11 @@ console.log("deleteThread");
               </div>
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-outline-primary" onClick={() => addBookMark()}
-                >BookMark</button>              
+              <button type="button" className="btn btn-outline-primary" id="modal_post_btn_bookmark" 
+                onClick={() => addBookMark()}>BookMark</button>              
               {props.userId === props.postUserId ? (
-                <button type="button" className="btn btn-outline-danger" onClick={() => childDeleteItem()}
+                <button type="button" className="btn btn-outline-danger" id="modal_post_btn_delete"
+                onClick={() => childDeleteItem()}
                 >Delete</button>
               ) : (
                 <span></span>
@@ -176,6 +177,8 @@ console.log("deleteThread");
       <style>{`
         #modal_open_button { display: none ;}
         .modal_post_wrap .bi {font-size: 0.8rem;}
+        .add_bookmark_diplay_remove {display: none;}
+        .delete_bookmark_diplay_remove {display: none;}
       `}</style>
     </div>
   )

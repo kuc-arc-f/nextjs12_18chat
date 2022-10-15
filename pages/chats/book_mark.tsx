@@ -18,7 +18,7 @@ import ModalPost from './ModalPost';
 //
 LibStorage.set_exStorage("auto_update", 1)
 //
-const ChatShow: React.FC = function () {
+const BookMark: React.FC = function () {
   const router = useRouter();
   const queryParamas = router.query;
   const [time, updateTime] = useState(Date.now());
@@ -35,7 +35,27 @@ const ChatShow: React.FC = function () {
   const [modaluserId, setmodaluserId] = useState(0);
   const [modalThreadItems, setModalThreadItems] = useState([]);
 //console.log("chatId=", chatId);  
-  const interval = 3000;
+
+  /**
+  * hiddenModalButton
+  * @param
+  *
+  * @return
+  */  
+  const hiddenModalButton = function ()
+  {
+    try{
+      //bookmark済は。add-button消す
+      const add_btn = document.getElementById("modal_post_btn_bookmark");
+      add_btn?.classList.add('add_bookmark_diplay_remove');
+      //Postは、削除できない
+      const delete_btn = document.getElementById("modal_post_btn_delete");
+      delete_btn?.classList.add('delete_bookmark_diplay_remove');
+    } catch (e) {
+      console.error(e);
+      throw new Error('Error , hiddenModalButton');
+    }
+  }
 
   /**
   * 起動処理
@@ -67,18 +87,6 @@ const ChatShow: React.FC = function () {
 //console.log(items);
         setItems(items);
       })()
-      //modal
-      const modalArea = document.getElementById('modalArea');
-      const openModal = document.getElementById('openModal');
-      const closeModal = document.getElementById('closeModal');
-      const modalBg = document.getElementById('modalBg');
-      const toggle = [openModal,closeModal,modalBg];
-      
-      for(let i=0, len=toggle.length ; i<len ; i++){
-        toggle[i]?.addEventListener('click',function(){
-          modalArea?.classList.toggle('is-show');
-        },false);
-      }      
     }
     LibNotify.validNotification();
   }, [queryParamas, router]);
@@ -145,12 +153,13 @@ const ChatShow: React.FC = function () {
 console.log("parentShow", id);
       setModalThreadItems([]);
       const post = LibChatPost.getShowItem(items, id);
-//console.log(post);
       setModalUserName(post.UserName);
       setModalBody(post.Body);
       setModalDatetime(post.createdAt);
       setModalId(post.id);
       setmodaluserId(post.UserId);
+//console.log(userId, post.UserId);
+      //modal Open
       const btn = document.getElementById("modal_open_button");
       btn?.click();
       //thread
@@ -179,6 +188,9 @@ console.log(thread);
       throw new Error('error, parentThreadAdd');
     }    
   }
+  if(typeof(document) !== "undefined") {
+    hiddenModalButton();
+  }
   //
   return (
     <Layout>
@@ -205,7 +217,7 @@ console.log(thread);
         {/* Post */}
         <div>
         {items.map((item: any ,index: number) => {
-//console.log("BookMarkId=", item.BookMarkId);
+//console.log(item.BookMarkId, userId, item.userId);
           return (
             <div key={item.BookMarkId}>
               <BookMarkRow id={item.id} user_name={item.UserName} body={item.Body}
@@ -234,4 +246,4 @@ console.log(thread);
     </Layout>
   );
 }
-export default ChatShow;
+export default BookMark;
