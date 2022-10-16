@@ -21,13 +21,13 @@ LibStorage.set_exStorage("auto_update", 1)
 const BookMark: React.FC = function () {
   const router = useRouter();
   const queryParamas = router.query;
-  const [time, updateTime] = useState(Date.now());
+//  const [time, updateTime] = useState(Date.now());
   const [items, setItems] = useState([]);
   const [chatId, setChatId] = useState(0);
   const [userId, setUserId] = useState(0);
-  const [lastCreateTime, setLastCreateTime] = useState("");
+//  const [lastCreateTime, setLastCreateTime] = useState("");
   const [chatName, setChatName] = useState("");
-  const [soundUrl, setSoundUrl] = useState("");
+//  const [soundUrl, setSoundUrl] = useState("");
   const [modalUserName, setModalUserName] = useState("");
   const [modalBody, setModalBody] = useState("");
   const [modalDatetime, setModalDatetime] = useState("");
@@ -64,28 +64,26 @@ const BookMark: React.FC = function () {
   * @return
   */  
   useEffect(() => {
-    //import bootstrap from 'bootstrap';
     if (!router.isReady) return;
     console.log("#init", queryParamas.id);
     if(queryParamas.id !== 'undefined') {
-      const envUrl = process.env.MY_NOTIFY_SOUND_URL;
-      // @ts-ignore
-      setSoundUrl(envUrl);
       setChatId(Number(queryParamas.id));
       const key = process.env.COOKIE_KEY_USER_ID;
       const uid = LibCookie.getCookie(key);
-//console.log("soundUrl=", envUrl);
       if(uid === null){
         location.href = '/auth/login';
       }   
       setUserId(Number(uid));   
       (async() => {
-        const chat = await LibChat.get(Number(queryParamas.id));
-        setChatName(chat.name);
         // @ts-ignore
         const items = await get_items(Number(queryParamas.id), Number(uid));
 //console.log(items);
         setItems(items);
+        if(items.length > 0) {
+          const chatOne = items[0];
+//console.log(chatOne);
+          setChatName(chatOne.ChatName);
+        }        
       })()
     }
     LibNotify.validNotification();
@@ -111,10 +109,6 @@ const BookMark: React.FC = function () {
       });           
       const json = await response.json();
 //console.log(json.data); 
-      if(json.data.length > 0) {
-        const row = json.data[0];
-        setLastCreateTime(row.createdAt);
-      }
       let items = json.data;
       items = LibCommon.getMmddhmmArray(items);
 //console.log(items);

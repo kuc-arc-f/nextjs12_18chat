@@ -44,9 +44,7 @@ const ThreadList: React.FC = function () {
     if (!router.isReady) return;
     console.log("#init", queryParamas.id);
     if(queryParamas.id !== 'undefined') {
-      const envUrl = process.env.MY_NOTIFY_SOUND_URL;
       // @ts-ignore
-//      setSoundUrl(envUrl);
       setChatId(Number(queryParamas.id));
       const key = process.env.COOKIE_KEY_USER_ID;
       const uid = LibCookie.getCookie(key);
@@ -56,12 +54,15 @@ const ThreadList: React.FC = function () {
       }   
       setUserId(Number(uid));   
       (async() => {
-        const chat = await LibChat.get(Number(queryParamas.id));
-        setChatName(chat.name);
         // @ts-ignore
         const items = await get_items(Number(queryParamas.id), Number(uid));
 //console.log(items);
         setItems(items);
+        if(items.length > 0) {
+          const chatOne = items[0];
+//console.log(chatOne);
+          setChatName(chatOne.ChatName);
+        }        
       })()
     }
     LibNotify.validNotification();

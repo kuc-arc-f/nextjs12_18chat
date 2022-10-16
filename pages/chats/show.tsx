@@ -16,6 +16,8 @@ import LibChat from '@/lib/LibChat';
 import LibThread from '@/lib/LibThread';
 import IndexRow from './IndexRow';
 import ModalPost from './ModalPost';
+// Global
+let lastThreadTime = "";
 //
 LibStorage.set_exStorage("auto_update", 1)
 //
@@ -27,9 +29,9 @@ const ChatShow: React.FC = function () {
   const [chatId, setChatId] = useState(0);
   const [userId, setUserId] = useState(0);
   const [lastCreateTime, setLastCreateTime] = useState("");
-  const [lastThreadTime, setLastThreadTime] = useState("");
+//  const [lastThreadTime, setLastThreadTime] = useState("");
   const [chatName, setChatName] = useState("");
-  const [soundUrl, setSoundUrl] = useState("");
+//  const [soundUrl, setSoundUrl] = useState("");
   const [modalUserName, setModalUserName] = useState("");
   const [modalBody, setModalBody] = useState("");
   const [modalDatetime, setModalDatetime] = useState("");
@@ -49,13 +51,10 @@ const ChatShow: React.FC = function () {
     if (!router.isReady) return;
     console.log("#init", queryParamas.id);
     if(queryParamas.id !== 'undefined') {
-      const envUrl = process.env.MY_NOTIFY_SOUND_URL;
       // @ts-ignore
-      setSoundUrl(envUrl);
       setChatId(Number(queryParamas.id));
       const key = process.env.COOKIE_KEY_USER_ID;
       const uid = LibCookie.getCookie(key);
-console.log("soundUrl=", envUrl);
       if(uid === null){
         location.href = '/auth/login';
       }   
@@ -63,33 +62,22 @@ console.log("soundUrl=", envUrl);
       //set chat_id
       const keyChatId = process.env.MY_LAST_CHAT_ID;
       LibCookie.setCookie(keyChatId, String(queryParamas.id));
-
       (async() => {
-        const chat = await LibChat.get(Number(queryParamas.id));
-        setChatName(chat.name);
-//console.log(chatName);
         // @ts-ignore
         const items = await get_items(Number(queryParamas.id));
-console.log(items);
+//console.log(items);
+        if(items.length > 0) {
+          const chatOne = items[0];
+          setChatName(chatOne.ChatName);
+        }
         setItems(items);
         //thread Last
         const post = await LibChatPost.getLastTime(Number(queryParamas.id));
         if(typeof(post.thread.createdAt) !== 'undefined') {
-          setLastThreadTime(post.thread.createdAt);
+          lastThreadTime = post.thread.createdAt;
+//console.log("lastThreadTime=", lastThreadTime);
         }  
       })()
-      //modal
-      const modalArea = document.getElementById('modalArea');
-      const openModal = document.getElementById('openModal');
-      const closeModal = document.getElementById('closeModal');
-      const modalBg = document.getElementById('modalBg');
-      const toggle = [openModal,closeModal,modalBg];
-      
-      for(let i=0, len=toggle.length ; i<len ; i++){
-        toggle[i]?.addEventListener('click',function(){
-          modalArea?.classList.toggle('is-show');
-        },false);
-      }      
     }
     LibNotify.validNotification();
   }, [queryParamas, router]);
@@ -113,7 +101,6 @@ console.log(items);
         body: JSON.stringify(item),
       });           
       const json = await response.json();
-//console.log(json.data); 
       if(json.data.length > 0) {
         const row = json.data[0];
         setLastCreateTime(row.createdAt);
@@ -132,12 +119,12 @@ console.log(items);
     const timeoutId: any = setTimeout(() => updateTime(Date.now()), interval);
     let valid = LibChatPost.postUpdate();
 //console.log("show.valid=", valid);
+//console.log("lastThreadTime=",lastThreadTime);
     if(valid) {
       (async() => {
         console.log("#execute_update");
         const post = await LibChatPost.getLastTime(chatId);
 //console.log(post);
-//console.log("lastThreadTime=", lastThreadTime);
         let createdAt = "";
         let thread_createdAt = "";
         let thread_id = 0;
@@ -176,9 +163,9 @@ console.log(items);
             //画面表示
             const badge_thread = document.getElementById("badge_thread_new");
             badge_thread?.classList.remove('hidden_badge_thread_new');
-            setLastThreadTime(thread_createdAt);
+            lastThreadTime = thread_createdAt;
+            post.thread.createdAt = thread_createdAt;
             const thread = await LibThread.getItem(thread_id);
-//console.log(thread);
             sendNotify("[ Thread Update ]", thread.body);
             await soundPlay();
           }
@@ -320,7 +307,7 @@ console.log(thread);
       if(thread.length > 0) {
         const item: any = thread[0];
 //console.log("createdAt=", item.createdAt);
-        setLastThreadTime(item.createdAt);
+        lastThreadTime  = item.createdAt;
       }
     } catch (e) {
       console.log(e);
