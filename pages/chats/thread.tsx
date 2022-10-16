@@ -172,11 +172,11 @@ console.log(thread);
         <hr className="my-1" />
         <div className="row">
           <div className="col-md-6 text-center">
-            <Link href={`/chats/show?id=${chatId}`}><a>[ Post ]</a>
+            <Link href={`/chats/show?id=${chatId}`}><a className="fs-5">[ Post ]</a>
             </Link>
           </div>
           <div className="col-md-6 text-center">
-            <Link href={`/chats/book_mark?id=${chatId}`}><a>[ BookMark ]</a>
+            <Link href={`/chats/book_mark?id=${chatId}`}><a className="fs-5">[ BookMark ]</a>
             </Link>
           </div>
         </div>

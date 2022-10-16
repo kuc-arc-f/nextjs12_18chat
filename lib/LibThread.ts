@@ -94,6 +94,30 @@ const LibThread = {
       console.error(e);
       throw new Error('Error, delete');
     }
-  },    
+  },  
+  /**
+  * getItem
+  * @param id: number: number
+  *
+  * @return
+  */   
+   getItem : async function (id: number): Promise<any>
+   {
+    try{
+      const url = process.env.MY_API_URL + "/thread/show/" + id.toString();
+      const res = await fetch(url, {
+        method: 'GET',
+      });
+      if (res.status != 200) {
+        throw new Error(await res.text());
+      }
+      const json = await res.json();
+//console.log(json);
+      return json.data;
+    } catch (e) {
+      console.error(e);
+      throw new Error('Error, getItem');
+    }
+   },    
 }
 export default LibThread;

@@ -27,6 +27,7 @@ const ChatShow: React.FC = function () {
   const [chatId, setChatId] = useState(0);
   const [userId, setUserId] = useState(0);
   const [lastCreateTime, setLastCreateTime] = useState("");
+  const [lastThreadTime, setLastThreadTime] = useState("");
   const [chatName, setChatName] = useState("");
   const [soundUrl, setSoundUrl] = useState("");
   const [modalUserName, setModalUserName] = useState("");
@@ -71,6 +72,11 @@ console.log("soundUrl=", envUrl);
         const items = await get_items(Number(queryParamas.id));
 console.log(items);
         setItems(items);
+        //thread Last
+        const post = await LibChatPost.getLastTime(Number(queryParamas.id));
+        if(typeof(post.thread.createdAt) !== 'undefined') {
+          setLastThreadTime(post.thread.createdAt);
+        }  
       })()
       //modal
       const modalArea = document.getElementById('modalArea');
@@ -113,7 +119,6 @@ console.log(items);
         setLastCreateTime(row.createdAt);
       }
       let items = json.data;
-//      items = LibCommon.getDateArray(items);
       items = LibCommon.getMmddhmmArray(items);
 //console.log(items);
       return items;
@@ -131,26 +136,53 @@ console.log(items);
       (async() => {
         console.log("#execute_update");
         const post = await LibChatPost.getLastTime(chatId);
-console.log(post.createdAt);
+//console.log(post);
+//console.log("lastThreadTime=", lastThreadTime);
         let createdAt = "";
+        let thread_createdAt = "";
+        let thread_id = 0;
         if(typeof(post.createdAt) !== 'undefined') {
           createdAt = post.createdAt;
         }
-        if(lastCreateTime === createdAt) {
-          return;
-        }
-        const items = await get_items(chatId);
-        setItems(items);
-        if(items.length > 0){
-          const item: any = items[0];
+        if(typeof(post.thread.createdAt) !== 'undefined') {
+          thread_createdAt = post.thread.createdAt;
+        }  
+        if(typeof(post.thread.id) !== 'undefined') {
+          thread_id = post.thread.id;
+        }             
+        if(
+          lastCreateTime !== createdAt || 
+          lastThreadTime !== thread_createdAt
+        ) 
+        {
+          //自動更新、通知判定
+          if(lastCreateTime !== createdAt) {
+            const items = await get_items(chatId);
+            setItems(items);
+            if(items.length > 0){
+              const item: any = items[0];
 //console.log(item.body, item.UserName, item.createdAt);
-          sendNotify(item.UserName, item.body);
-          //timeer , sound
-          setTimeout(async () => {
-            console.log("#sound start");
+              sendNotify(item.UserName, item.body);
+              //timer , sound
+              setTimeout(async () => {
+                console.log("#sound start");
+                await soundPlay();
+              }, 3000);
+            }
+            return;
+          }
+          //post Update, thread 通知なし
+          if(lastThreadTime !== thread_createdAt && thread_id > 0) {
+            //画面表示
+            const badge_thread = document.getElementById("badge_thread_new");
+            badge_thread?.classList.remove('hidden_badge_thread_new');
+            setLastThreadTime(thread_createdAt);
+            const thread = await LibThread.getItem(thread_id);
+//console.log(thread);
+            sendNotify("[ Thread Update ]", thread.body);
             await soundPlay();
-          }, 3000);
-        }        
+          }
+        }          
       })()      
     }
     return () => {
@@ -283,8 +315,13 @@ console.log(thread);
   {
     try {
       const thread = await LibThread.getItems(chatPostId);
-console.log(thread);
+//console.log(thread);
       setModalThreadItems(thread);      
+      if(thread.length > 0) {
+        const item: any = thread[0];
+//console.log("createdAt=", item.createdAt);
+        setLastThreadTime(item.createdAt);
+      }
     } catch (e) {
       console.log(e);
       throw new Error('error, parentThreadAdd');
@@ -341,11 +378,13 @@ console.log(thread);
         <hr className="my-1" />
         <div className="row">
           <div className="col-md-6 text-center">
-            <Link href={`/chats/thread?id=${chatId}`}><a>[ Thread ]</a>
-            </Link>          
+            <Link href={`/chats/thread?id=${chatId}`}><a className="fs-5">[ Thread ]</a>
+            </Link>
+            <span id="badge_thread_new"
+             className="hidden_badge_thread_new mx-2 badge rounded-pill bg-primary">New</span>          
           </div>
           <div className="col-md-6 text-center">
-            <Link href={`/chats/book_mark?id=${chatId}`}><a>[ BookMark ]</a>
+            <Link href={`/chats/book_mark?id=${chatId}`}><a className="fs-5">[ BookMark ]</a>
             </Link>
           </div>
         </div>
@@ -396,7 +435,8 @@ console.log(thread);
          chatId={chatId} parentThreadAdd={parentThreadAdd} modalThreadItems={modalThreadItems}
          ></ModalPost>        
         <style>{`
-          .chat_show_wrap .notify_audio{ display: none ;}
+          .hidden_badge_thread_new {display: none; }
+          .chat_show_wrap .notify_audio{ display: none;}
           .chat_show_wrap .row_trash_icon{ font-size: 1rem; }
           .chat_show_wrap .pre_text {
             font-family: BlinkMacSystemFont,Roboto;

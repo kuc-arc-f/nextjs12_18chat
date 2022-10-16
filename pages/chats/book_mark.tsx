@@ -203,11 +203,11 @@ console.log(thread);
         <hr className="my-1" />
         <div className="row">
           <div className="col-md-6 text-center">
-            <Link href={`/chats/show?id=${chatId}`}><a>[ Post ]</a>
+            <Link href={`/chats/show?id=${chatId}`}><a className="fs-5">[ Post ]</a>
             </Link>
           </div>
           <div className="col-md-6 text-center">
-            <Link href={`/chats/thread?id=${chatId}`}><a>[ Thread ]</a>
+            <Link href={`/chats/thread?id=${chatId}`}><a className="fs-5">[ Thread ]</a>
             </Link>
           </div>
           {/*
