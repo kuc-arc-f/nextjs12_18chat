@@ -100,6 +100,8 @@ console.log("deleteThread");
     }
   };
   //
+  const mdText = LibCommon.replaceBrString(props.body);
+  //
   return (
     <div className="row justify-content-center modal_post_wrap">
       {/* button */}
@@ -118,7 +120,10 @@ console.log("deleteThread");
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div className="modal-body bg-light">
-              <pre className="pre_text">{props.body}</pre>
+              {/*  <pre className="pre_text">{props.body}</pre>
+              */}
+              <div id="post_item" dangerouslySetInnerHTML={{__html: `${mdText}`}}>
+              </div>
               <hr className="my-1" />
               <span className="mx-2">ID: {props.id}</span>
               <hr className="my-1" />
@@ -136,6 +141,7 @@ console.log("deleteThread");
                 props.modalThreadItems.map((item: any ,index: number) => {
  //console.log("uid=", item.id, item.userId);
                   const threadCreatedAt = LibCommon.converDatetimeString(item.createdAt);
+                  let bodyText = LibCommon.replaceBrString(item.body);
                   return (
                     <div key={item.id}>
                       <span className="fs-5">{item.UserName}</span> 
@@ -148,7 +154,10 @@ console.log("deleteThread");
                         <span></span>
                       )}
                       <br />
-                      <pre className="mb-1">{item.body}</pre>
+                      {/* <pre className="mb-1">{item.body}</pre>
+                      */}
+                      <div dangerouslySetInnerHTML={{__html: `${bodyText}`}}>
+                      </div>                      
                       <hr className="my-1" />
                     </div>
                   )                  

@@ -1,6 +1,6 @@
 import Link from 'next/link';
-//import LibChatPost from '@/lib/LibChatPost'
-import LibBookMark from '@/lib/LibBookMark'
+import LibBookMark from '@/lib/LibBookMark';
+import LibCommon from '@/lib/LibCommon';
 //Types
 interface IProps {
   id: number,
@@ -52,12 +52,14 @@ console.log("showItem", props.chatPostId);
       alert("Error, delete NG");
     }
   }
+  const mdText = LibCommon.replaceBrString(props.body);
   //
   return (
   <div className="card task_card_box shadow-lg mb-2">
     <h5 className="card-header">{props.user_name}</h5>
     <div className="card-body">
-      <pre className="pre_text my-1">{props.body}</pre>
+      <div id="post_item" dangerouslySetInnerHTML={{__html: `${mdText}`}}>
+      </div>      
       <hr className="my-1" />
       <span className="mx-0 text-secondary">{props.updatedAt}</span>
       <span className="mx-2">ID: {props.id}</span>

@@ -18,6 +18,9 @@ import IndexRow from './IndexRow';
 import ModalPost from './ModalPost';
 // Global
 let lastThreadTime = "";
+let userId : number = 0;
+let chatName: string = "";
+let chatId: number = 0;
 //
 LibStorage.set_exStorage("auto_update", 1)
 //
@@ -26,12 +29,7 @@ const ChatShow: React.FC = function () {
   const queryParamas = router.query;
   const [time, updateTime] = useState(Date.now());
   const [items, setItems] = useState([]);
-  const [chatId, setChatId] = useState(0);
-  const [userId, setUserId] = useState(0);
   const [lastCreateTime, setLastCreateTime] = useState("");
-//  const [lastThreadTime, setLastThreadTime] = useState("");
-  const [chatName, setChatName] = useState("");
-//  const [soundUrl, setSoundUrl] = useState("");
   const [modalUserName, setModalUserName] = useState("");
   const [modalBody, setModalBody] = useState("");
   const [modalDatetime, setModalDatetime] = useState("");
@@ -52,13 +50,14 @@ const ChatShow: React.FC = function () {
     console.log("#init", queryParamas.id);
     if(queryParamas.id !== 'undefined') {
       // @ts-ignore
-      setChatId(Number(queryParamas.id));
+      chatId = Number(queryParamas.id);
       const key = process.env.COOKIE_KEY_USER_ID;
       const uid = LibCookie.getCookie(key);
       if(uid === null){
         location.href = '/auth/login';
       }   
-      setUserId(Number(uid));
+      userId = Number(uid);
+//console.log("userId=", userId);
       //set chat_id
       const keyChatId = process.env.MY_LAST_CHAT_ID;
       LibCookie.setCookie(keyChatId, String(queryParamas.id));
@@ -68,7 +67,7 @@ const ChatShow: React.FC = function () {
 //console.log(items);
         if(items.length > 0) {
           const chatOne = items[0];
-          setChatName(chatOne.ChatName);
+          chatName = chatOne.ChatName;
         }
         setItems(items);
         //thread Last

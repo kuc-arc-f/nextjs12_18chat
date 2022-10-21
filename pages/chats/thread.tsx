@@ -15,6 +15,10 @@ import LibChat from '@/lib/LibChat';
 import LibThread from '@/lib/LibThread';
 import ThreadRow from './ThreadRow';
 import ModalPost from './ModalPost';
+// Global
+let userId : number = 0;
+let chatName: string = "";
+let chatId: number = 0;
 //
 LibStorage.set_exStorage("auto_update", 1)
 //
@@ -22,9 +26,6 @@ const ThreadList: React.FC = function () {
   const router = useRouter();
   const queryParamas = router.query;
   const [items, setItems] = useState([]);
-  const [chatId, setChatId] = useState(0);
-  const [userId, setUserId] = useState(0);
-  const [chatName, setChatName] = useState("");
   const [modalUserName, setModalUserName] = useState("");
   const [modalBody, setModalBody] = useState("");
   const [modalDatetime, setModalDatetime] = useState("");
@@ -40,19 +41,18 @@ const ThreadList: React.FC = function () {
   * @return
   */  
   useEffect(() => {
-    //import bootstrap from 'bootstrap';
     if (!router.isReady) return;
     console.log("#init", queryParamas.id);
     if(queryParamas.id !== 'undefined') {
       // @ts-ignore
-      setChatId(Number(queryParamas.id));
+      chatId = Number(queryParamas.id);
       const key = process.env.COOKIE_KEY_USER_ID;
       const uid = LibCookie.getCookie(key);
 //console.log("soundUrl=", envUrl);
       if(uid === null){
         location.href = '/auth/login';
       }   
-      setUserId(Number(uid));   
+      userId = Number(uid);
       (async() => {
         // @ts-ignore
         const items = await get_items(Number(queryParamas.id), Number(uid));
@@ -61,7 +61,7 @@ const ThreadList: React.FC = function () {
         if(items.length > 0) {
           const chatOne = items[0];
 //console.log(chatOne);
-          setChatName(chatOne.ChatName);
+          chatName = chatOne.ChatName;
         }        
       })()
     }
