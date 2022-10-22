@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 //
 import { useRouter } from "next/router";
 import Layout from '@/components/layout'
+import LoadingBox from '@/components/LoadingBox'
 import LibChatPost from '@/lib/LibChatPost'
 import LibStorage from '@/lib/LibStorage';
 import LibNotify from '@/lib/LibNotify';
@@ -33,6 +34,7 @@ const BookMark: React.FC = function () {
   const [modalId, setModalId] = useState(0);
   const [modaluserId, setmodaluserId] = useState(0);
   const [modalThreadItems, setModalThreadItems] = useState([]);
+  const [loadingDisplay, setloadingDisplay] = useState(true);
 //console.log("chatId=", chatId);  
 
   /**
@@ -83,7 +85,8 @@ const BookMark: React.FC = function () {
           const chatOne = items[0];
 //console.log(chatOne);
           chatName = chatOne.ChatName;
-        }        
+        }
+        setloadingDisplay(false); //loading=false        
       })()
     }
     LibNotify.validNotification();
@@ -188,6 +191,10 @@ console.log(thread);
   //
   return (
     <Layout>
+      <>
+      {loadingDisplay ? (<LoadingBox></LoadingBox>): (
+        <div></div>
+      )}      
       <div className="container bg-light chat_show_wrap">
         {/* name */}
         <div className="row">
@@ -237,6 +244,7 @@ console.log(thread);
           }
         `}</style>        
       </div>
+      </>
     </Layout>
   );
 }

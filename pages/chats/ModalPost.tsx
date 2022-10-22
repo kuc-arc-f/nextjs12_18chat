@@ -119,10 +119,11 @@ console.log("deleteThread");
               <span className="mx-2 text-secondary">{createdAt}</span>
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div className="modal-body bg-light">
+            <div className="modal-body bg-light py-2">
               {/*  <pre className="pre_text">{props.body}</pre>
               */}
-              <div id="post_item" dangerouslySetInnerHTML={{__html: `${mdText}`}}>
+              <div id="post_item" dangerouslySetInnerHTML={{__html: `${mdText}`}}
+              className="bg-white p-2">
               </div>
               <hr className="my-1" />
               <span className="mx-2">ID: {props.id}</span>
@@ -143,7 +144,7 @@ console.log("deleteThread");
                   const threadCreatedAt = LibCommon.converMmddTimeString(item.createdAt);
                   let bodyText = LibCommon.replaceBrString(item.body);
                   return (
-                    <div key={item.id}>
+                    <div key={item.id} className="bg-white">
                       <span className="fs-5">{item.UserName}: </span> 
                       <span className="mx-1 text-secondary">{threadCreatedAt}</span>
                       {props.userId === item.userId ? (
@@ -154,9 +155,7 @@ console.log("deleteThread");
                         <span></span>
                       )}
                       <br />
-                      {/* <pre className="mb-1">{item.body}</pre>
-                      */}
-                      <div dangerouslySetInnerHTML={{__html: `${bodyText}`}}>
+                      <div dangerouslySetInnerHTML={{__html: `${bodyText}`}} >
                       </div>                      
                       <hr className="my-1" />
                     </div>

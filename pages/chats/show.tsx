@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 //
 import { useRouter } from "next/router";
 import Layout from '@/components/layout'
+import LoadingBox from '@/components/LoadingBox'
 import LibChatPost from '@/lib/LibChatPost'
 import LibStorage from '@/lib/LibStorage';
 import LibNotify from '@/lib/LibNotify';
@@ -36,6 +37,7 @@ const ChatShow: React.FC = function () {
   const [modalId, setModalId] = useState(0);
   const [modaluserId, setmodaluserId] = useState(0);
   const [modalThreadItems, setModalThreadItems] = useState([]);
+  const [loadingDisplay, setloadingDisplay] = useState(true);
 //console.log("chatId=", chatId);  
   const interval = 3000;
 
@@ -77,7 +79,8 @@ const ChatShow: React.FC = function () {
         if(typeof(post.thread.createdAt) !== 'undefined') {
           lastThreadTime = post.thread.createdAt;
 //console.log("lastThreadTime=", lastThreadTime);
-        }  
+        }
+        setloadingDisplay(false); //loading=false  
       })()
     }
     LibNotify.validNotification();
@@ -359,6 +362,10 @@ const ChatShow: React.FC = function () {
   //
   return (
     <Layout>
+      <>
+      {loadingDisplay ? (<LoadingBox></LoadingBox>): (
+        <div></div>
+      )}      
       <div className="container bg-light chat_show_wrap">
         {/* notify_sound */}      
         <audio className="notify_audio" src="/notify.mp3" id="notify_sound"
@@ -435,12 +442,11 @@ const ChatShow: React.FC = function () {
             font-family: BlinkMacSystemFont,Roboto;
             font-size: 1rem;
           }
+          .row_head_username { font-weight: bold; }
         `}</style>        
       </div>
+      </>
     </Layout>
   );
 }
 export default ChatShow;
-/*
-"Segoe UI",
-*/
