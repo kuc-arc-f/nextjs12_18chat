@@ -116,7 +116,7 @@ console.log("deleteThread");
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="exampleModalLabel">{props.user_name}</h5>
-              <span className="mx-2">{createdAt}</span>
+              <span className="mx-2 text-secondary">{createdAt}</span>
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div className="modal-body bg-light">
@@ -128,7 +128,7 @@ console.log("deleteThread");
               <span className="mx-2">ID: {props.id}</span>
               <hr className="my-1" />
               <div className="row">
-                <div className="col-sm-9"><textarea className="form-control" id="modal_reply_body" rows={2} />
+                <div className="col-sm-9"><textarea className="form-control" id="modal_reply_body" rows={3} />
                 </div>
                 <div className="col-sm-3">
                   <button className="mt-2 btn btn-primary" onClick={() => createReply()} >
@@ -140,12 +140,12 @@ console.log("deleteThread");
               {props.modalThreadItems ? (
                 props.modalThreadItems.map((item: any ,index: number) => {
  //console.log("uid=", item.id, item.userId);
-                  const threadCreatedAt = LibCommon.converDatetimeString(item.createdAt);
+                  const threadCreatedAt = LibCommon.converMmddTimeString(item.createdAt);
                   let bodyText = LibCommon.replaceBrString(item.body);
                   return (
                     <div key={item.id}>
-                      <span className="fs-5">{item.UserName}</span> 
-                      <span className="mx-2">{threadCreatedAt}</span>
+                      <span className="fs-5">{item.UserName}: </span> 
+                      <span className="mx-1 text-secondary">{threadCreatedAt}</span>
                       {props.userId === item.userId ? (
                         <button type="button" className="btn btn-sm btn-outline-secondary mx-2"
                           onClick={() => deleteThread(item.id)} ><i className="bi bi-trash-fill"></i>

@@ -47,6 +47,7 @@ const ChatShow: React.FC = function () {
   */  
   useEffect(() => {
     if (!router.isReady) return;
+    LibChatPost.resetInitTime();
     console.log("#init", queryParamas.id);
     if(queryParamas.id !== 'undefined') {
       // @ts-ignore
@@ -71,7 +72,8 @@ const ChatShow: React.FC = function () {
         }
         setItems(items);
         //thread Last
-        const post = await LibChatPost.getLastTime(Number(queryParamas.id));
+        const post = await LibChatPost.getLastTime(Number(queryParamas.id), userId);
+//console.log(post)
         if(typeof(post.thread.createdAt) !== 'undefined') {
           lastThreadTime = post.thread.createdAt;
 //console.log("lastThreadTime=", lastThreadTime);
@@ -117,12 +119,12 @@ const ChatShow: React.FC = function () {
   useEffect(() => {
     const timeoutId: any = setTimeout(() => updateTime(Date.now()), interval);
     let valid = LibChatPost.postUpdate();
-//console.log("show.valid=", valid);
+//console.log("lastCreateTime=",lastCreateTime);
 //console.log("lastThreadTime=",lastThreadTime);
     if(valid) {
       (async() => {
         console.log("#execute_update");
-        const post = await LibChatPost.getLastTime(chatId);
+        const post = await LibChatPost.getLastTime(chatId, userId);
 //console.log(post);
         let createdAt = "";
         let thread_createdAt = "";
@@ -145,6 +147,7 @@ const ChatShow: React.FC = function () {
           if(lastCreateTime !== createdAt) {
             const items = await get_items(chatId);
             setItems(items);
+//            setLastCreateTime(createdAt)
             if(items.length > 0){
               const item: any = items[0];
 //console.log(item.body, item.UserName, item.createdAt);
@@ -160,12 +163,16 @@ const ChatShow: React.FC = function () {
           //post Update, thread 通知なし
           if(lastThreadTime !== thread_createdAt && thread_id > 0) {
             //画面表示
+//console.log("modalId=", modalId);
             const badge_thread = document.getElementById("badge_thread_new");
             badge_thread?.classList.remove('hidden_badge_thread_new');
             lastThreadTime = thread_createdAt;
             post.thread.createdAt = thread_createdAt;
-            const thread = await LibThread.getItem(thread_id);
-            sendNotify("[ Thread Update ]", thread.body);
+            const threads = await LibThread.getItems(modalId);
+            setModalThreadItems(threads);
+            if(threads.length > 0) {
+              sendNotify("[ Thread Update ]", threads[0].body);
+            }
             await soundPlay();
           }
         }          
@@ -271,10 +278,10 @@ const ChatShow: React.FC = function () {
   const parentShow = async function (id: number) 
   {
     try {
-console.log("parentShow", id);
+//console.log("parentShow", id);
       setModalThreadItems([]);
       const post = LibChatPost.getShowItem(items, id);
-console.log(post);
+//console.log(post);
       setModalUserName(post.UserName);
       setModalBody(post.body);
       setModalDatetime(post.createdAt);
@@ -284,7 +291,7 @@ console.log(post);
       btn?.click();
       //thread
       const thread = await LibThread.getItems(id);
-console.log(thread);
+//console.log(thread);
       setModalThreadItems(thread);
     } catch (e) {
       console.log(e);

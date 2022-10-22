@@ -35,6 +35,25 @@ const LibCommon = {
     }
   },
   /**
+  * converMmddTimeString : MM/DD HH:MI
+  * @param
+  *
+  * @return string
+  */    
+   converMmddTimeString: function(value: any): string
+   {
+     try{
+       let ret = "";
+       let dtObj = new Date(value);
+       let dt = moment(dtObj);      
+       ret = dt.format("MM-DD HH:mm");
+       return ret;
+     } catch (e) {
+       console.log(e);
+       throw new Error('error, converMmddTimeString');
+     }
+   },  
+  /**
   * getDatetimeArray
   * @param items: array
   *

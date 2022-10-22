@@ -3,8 +3,7 @@ import LibStorage from './LibStorage';
 import LibConfig from './LibConfig'
 // 初期値
 const initParam =  {
-  ACTIVE_UPDATE_SEC: 60,
-//  ACTIVE_UPDATE_SEC: 30,
+  ACTIVE_UPDATE_SEC: 30,
   STATE_ACTIVE: 1,      
   STATE_NON_ACTIVE: 2,      
   STATE_DISPLAY_ACTIVE: "Active",      
@@ -42,6 +41,16 @@ console.log(chatParams.STAT, sec, valid , auto_update, chatParams.REMAIN_TIME );
     }
     return ret;
   },
+  /**
+  * resetInitTime
+  * @param
+  *
+  * @return
+  */ 
+  resetInitTime: function(): void
+  {
+    chatParams.INIT_TIME = new Date();
+  },  
   /**
   * get_remain_time : 初期化からの経過時間
   * @param
@@ -200,12 +209,13 @@ console.log(chatParams.STAT, sec, valid , auto_update, chatParams.REMAIN_TIME );
   *
   * @return Promise
   */      
-  getLastTime : async function (chatId: number): Promise<any>
+  getLastTime : async function (chatId: number, userId: number): Promise<any>
   {
     try {
       let ret = {};
       const item = {
         chatId: chatId,
+        userId: userId,
       }
 //console.log(item)      
        const res = await fetch(process.env.MY_API_URL + '/chat_posts/get_last_time', {
