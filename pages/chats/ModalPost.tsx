@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
+import MessageBox from '@/components/MessageBox'
 import LibCommon from '@/lib/LibCommon';
 import LibChatPost from '@/lib/LibChatPost'
 import LibThread from '@/lib/LibThread'
@@ -16,6 +17,7 @@ interface IProps {
   parentFunc: any,
   parentThreadAdd: any,
   modalThreadItems: any[],
+//  message: string,
 }
 
 /**
@@ -26,9 +28,10 @@ interface IProps {
 */
 const ModalPost: React.FC<IProps> = function (props: any) {
   const [items, setItems] = useState([]);
+  const [messageDisplay, setmessageDisplay] = useState("");
   let createdAt = props.createdAt;
-  createdAt = LibCommon.converDatetimeString(createdAt);
-//console.log(props.modalThreadItems);
+  createdAt = LibCommon.converDatetimeString(createdAt);  
+//console.log("messageDisplay=", messageDisplay);
   /**
   * childDeleteItem : 投稿の削除
   * @param
@@ -55,7 +58,7 @@ const ModalPost: React.FC<IProps> = function (props: any) {
   */  
   const deleteThread = async function (threadId: number) {
     try {
-console.log("deleteThread");
+//console.log("deleteThread");
       await LibThread.delete(threadId);
       await props.parentThreadAdd(props.id);      
     } catch (e) {
@@ -92,7 +95,10 @@ console.log("deleteThread");
   const addBookMark = async function () {
     try {
       await LibBookMark.create(props.id, props.chatId, props.userId);
-      alert("Complete, BookMark add");
+      setmessageDisplay("BookMark add")
+      setTimeout(async () => {
+        setmessageDisplay("");
+      }, 3000);      
 //console.log(items);
     } catch (e) {
       console.error(e);
@@ -165,6 +171,10 @@ console.log("deleteThread");
               : ""}
               </div>
             </div>
+            {/* message BM */}
+            {messageDisplay ? (<MessageBox success={messageDisplay}></MessageBox>)
+            : ""
+            }
             <div className="modal-footer">
               <button type="button" className="btn btn-outline-primary" id="modal_post_btn_bookmark" 
                 onClick={() => addBookMark()}>BookMark</button>              
@@ -193,3 +203,9 @@ console.log("deleteThread");
 }
   ;
 export default ModalPost;
+/*
+            {messageDisplay ? (
+              <MessageBox success={messageDisplay} error="" > 
+              </MessageBox>
+            ): ""}
+*/

@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import Head from 'next/head';
-//import flash from 'next-flash';
 import React from 'react'
 
 interface IProps {
@@ -9,16 +8,7 @@ interface IProps {
 }
 //
 export default class Page extends React.Component<IProps> {
-  /*
-  static async getInitialProps (ctx) {
-    return {
-      messages_success:  this.props.messages_success || '',
-      messages_error:  this.props.messages_error,
-    }
-  }  
-  */
   componentDidMount(){
-//    console.log(this.props)
   }
   render(){
     let messages_success = ""

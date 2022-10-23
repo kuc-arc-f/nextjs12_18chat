@@ -238,10 +238,6 @@ console.log(thread);
         <style>{`
           .chat_show_wrap .notify_audio{ display: none ;}
           .chat_show_wrap .row_trash_icon{ font-size: 1rem; }
-          .chat_show_wrap .pre_text {
-            font-family: BlinkMacSystemFont,Roboto;
-            font-size: 1rem;
-          }
         `}</style>        
       </div>
       </>

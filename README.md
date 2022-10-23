@@ -6,12 +6,12 @@
 
  date    : 2022/09/18 
 
- update  : 2022/10/22 
+ update  : 2022/10/23 
 
 ***
 ### Summary
 
-Next.js 12 , chat app sample
+Next.js 12 / PWA, chat app sample
 
 ***
 ### API server / back

@@ -37,6 +37,7 @@ const ChatShow: React.FC = function () {
   const [modalId, setModalId] = useState(0);
   const [modaluserId, setmodaluserId] = useState(0);
   const [modalThreadItems, setModalThreadItems] = useState([]);
+//  const [modalMessage, setmodalMessage] = useState("");
   const [loadingDisplay, setloadingDisplay] = useState(true);
 //console.log("chatId=", chatId);  
   const interval = 3000;
@@ -281,7 +282,6 @@ const ChatShow: React.FC = function () {
   const parentShow = async function (id: number) 
   {
     try {
-//console.log("parentShow", id);
       setModalThreadItems([]);
       const post = LibChatPost.getShowItem(items, id);
 //console.log(post);
