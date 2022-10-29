@@ -19,6 +19,17 @@ Next.js 12 / PWA, chat app sample
 https://github.com/kuc-arc-f/express_api_12chat
 
 ***
+### Get started
+
+https://cms-kuc-js-front1.pages.dev/pages/20221029093715
+
+***
+* screen
+![img](https://img-static-kuc.netlify.app/img/js-front1/chat/ss-chat0129a.png)
+
+![img](https://img-static-kuc.netlify.app/img/js-front1/chat/ss-chat0129b.png)
+
+***
 ### Setup
 
 * next.config.js , MY_API_URL set
